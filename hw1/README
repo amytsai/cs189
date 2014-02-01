@@ -1,0 +1,18 @@
+Homework 1
+==========
+Amy Tsai
+22752071
+
+The following should be done in Matlab with liblinear installed and the Data folder included on the path.
+Q1
+--
+Run q1.m
+
+Q2
+--
+Run q2.m
+
+Q3
+--
+'C' estimation was done using the code in q3.m and changing the input parameters to narrow down the search range.
+Testing the 'C' value on the full data set was done using full_data_test.m
