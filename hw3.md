@@ -61,4 +61,10 @@ This is the covariate matrix of class "1" displayed as a heat map.
 The image shows that the matrix is symmetric and semidefinite.
 
 ###(iv)
+#### A
+![Q3iva](Q3iva.png)
+This is a linear decision boundary since we are essentially calculating a linear combination in 784 space.
 
+#### B
+![Q3ivb](Q3ivb.png)
+This is a quadratic decision boundary.

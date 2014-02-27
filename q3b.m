@@ -68,7 +68,7 @@ for set = [1:7]
     probabilities = zeros(10000, 10);
         for class = 0:9
             sigma = sigma_digits(class+1);
-            sigma= 5*(sigma + eye(784)*.005);
+            sigma= 6.9*(sigma + eye(784)*.0047);
             g = mvnpdf(testFeatures, mu_digits(class+1, :), sigma);
             probabilities(:, class+1) = g.*priors(class+1);
         end
