@@ -49,5 +49,5 @@ def sanity_check():
 	print "Cal is " + nschoolcolor.choice("Cal")
 	print "Stanford is " + schoolcolor.choice("Stanford")
 	print "Stanford is " + nschoolcolor.choice("Stanford")
-	print "Everyonen else is also " + nschoolcolor.choice("Everyone")
+	print "Everyone else is also " + nschoolcolor.choice("Everyone")
 
