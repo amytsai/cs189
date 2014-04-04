@@ -9,16 +9,16 @@ class DecisionTree:
 		self.leaf_value = leaf_value
 
 	def recursive_choice(self, obj):
-		if fn(obj):
+		if self.fn(obj):
 			return self.true_node.choice(obj)
 		else:
 			return self.false_node.choice(obj)
 
 	def choice(self, obj):
 		cur_node = self
-		while cur_node.leaf_value is not None:
-			if fn(obj):
-				cur_node = cur_node.left
+		while cur_node.leaf_value is None:
+			if self.fn(obj):
+				cur_node = cur_node.true_node
 			else:
-				cur_node = cur_node.right
+				cur_node = cur_node.false_node
 		return cur_node.leaf_value
