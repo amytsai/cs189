@@ -2,22 +2,13 @@ import scipy
 
 class DecisionTree:
 
-	def __init__(self, fn, nodes, leaf_value = None):
+	def __init__(self, fn, nodes = None, leaf_value = None):
 		self.fn = fn
 		self.nodes = nodes
 		self.leaf_value = leaf_value
 
 	def check_valid(self):
 		assert self.leaf_value is not None or (self.nodes and len(self.nodes) > 1) # either we can make a choice or we're a leaf
-
-	def recursive_choice(self, obj):
-		index = self.fn(obj)
-		if index:
-			if index is True:
-				index = 1
-			return self.nodes[index].choice(obj)
-		else:
-			return self.nodes[0].choice(obj)
 
 	def choice(self, obj):
 		cur_node = self
