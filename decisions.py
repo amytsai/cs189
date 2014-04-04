@@ -1,5 +1,6 @@
 import scipy
 from collections import Counter
+from math import *
 
 def entropy(binarized_examples):
 	""" calculates the entropy of a list of binarized examples 
@@ -16,7 +17,11 @@ def entropy(binarized_examples):
 
 def optimal_split(examples_X, examples_Y, attribute):
 	""" TODO: find the optimal split point of an attribute given examples and
-		labels """
+		labels
+
+		For the attribute, sort values and calculate infoGain continuing to increment
+		until the infoGain stops improving
+	"""
 	return 0.0
 
 
@@ -28,8 +33,7 @@ def binarize(examples_X, attribute, split):
 def infoGain(examples_X, examples_Y, attribute, split):
 	H_Y = entropy(examples_Y.flatten())
 	X = binarize(examples_X, attribute, split)
-
-    P_x1 = sum(X)/float(len(X)) # probability X is true
+	P_x1 = sum(X)/float(len(X)) # probability X is true
 	P_x0 = 1 - P_x1 # probability X is false
 	H_Y1 = entropy(examples_Y.flatten()[X==1]) #entropy Y | X = 1
 	H_Y0 = entropy(examples_Y.flatten()[X==0]) #entropy Y | X = 0

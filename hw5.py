@@ -3,14 +3,24 @@ import scipy.io as sio
 import numpy as np
 from decisions import *
 
-spam = sio.loadmat("spam.mat")
-xtest = spam['Xtest']
-xtrain = spam['Xtrain']
-ytrain = spam['ytrain']
-
 leaf = DecisionTree.leaf # for convenience
 
+def main():
+	"""
+	just some testing stuff for now
+	"""
 
+	spam = sio.loadmat("spam.mat")
+	xtest = spam['Xtest']
+	xtrain = spam['Xtrain']
+	ytrain = spam['ytrain']
+
+	print "entropy of ytrain: "
+	print entropy(ytrain.flatten())
+
+
+if __name__ == "__main__":
+    main()
 
 	
 
