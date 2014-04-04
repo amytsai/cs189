@@ -1,4 +1,5 @@
 import scipy
+from collections import Counter
 
 class DecisionTree:
 
@@ -32,6 +33,19 @@ class DecisionTree:
 	def leaf(leaf_value):
 		return DecisionTree(None, None, leaf_value)
 
+class RandomForest:
+
+	def __init__(self, trees):
+		self.trees = trees
+
+	def __str__(self):
+		return "<RandomForest of %u trees>" % len(self.trees)
+
+	def choose(self, obj):
+		answers = Counter()
+		for tree in self.trees:
+			answers[tree.choose(obj)] += 1
+		return max(answers, key = lambda x: answers[x])
 
 
 def sanity_check():
@@ -54,6 +68,8 @@ def sanity_check():
 	nschoolcolor = DecisionTree(isStanfordNumerical, (blueleaf, redleaf))
 	print schoolcolor
 	print nschoolcolor
+	forest = RandomForest((schoolcolor, nschoolcolor))
+	print forest
 
 	print "Cal is " + schoolcolor.choose("Cal")
 	print "Cal is " + nschoolcolor.choose("Cal")
@@ -61,3 +77,7 @@ def sanity_check():
 	print "Stanford is " + nschoolcolor.choose("Stanford")
 	print "Everyone else is also " + nschoolcolor.choose("Everyone")
 
+	print "The forest thinks that Cal is " + forest.choose("Cal")
+	print "The forest thinks that Stanford is " + forest.choose("Stanford")
+
+s = sanity_check
