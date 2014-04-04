@@ -70,36 +70,29 @@ class RandomForest:
 
 
 def sanity_check():
-	blueleaf = DecisionTree.leaf("blue")
-	redleaf = DecisionTree.leaf("red")
-	print blueleaf
-	print redleaf
-
 	def isStanford(s):
 		if s == "Stanford":
 			return True
 		return False
-
 	def isStanfordNumerical(s):
 		if s == "Stanford":
 			return 1
 		return 0
-
+		
+	blueleaf = DecisionTree.leaf("blue")
+	redleaf = DecisionTree.leaf("red")
 	schoolcolor = DecisionTree(isStanford, (blueleaf, redleaf))
 	nschoolcolor = DecisionTree(isStanfordNumerical, (blueleaf, redleaf))
-	print schoolcolor
-	print nschoolcolor
 	forest = RandomForest((schoolcolor, nschoolcolor))
-	print forest
 
-	print "Cal is " + schoolcolor.choose("Cal")
-	print "Cal is " + nschoolcolor.choose("Cal")
-	print "Stanford is " + schoolcolor.choose("Stanford")
-	print "Stanford is " + nschoolcolor.choose("Stanford")
-	print "Everyone else is also " + nschoolcolor.choose("Everyone")
+	assert schoolcolor.choose("Cal") == "blue"
+	assert nschoolcolor.choose("Cal") == "blue"
+	assert schoolcolor.choose("Stanford") == "red"
+	assert nschoolcolor.choose("Stanford") == "red"
+	assert nschoolcolor.choose("Everyone") == "blue"
 
-	print "The forest thinks that Cal is " + forest.choose("Cal")
-	print "The forest thinks that Stanford is " + forest.choose("Stanford")
+	assert forest.choose("Cal") == "blue"
+	assert forest.choose("Stanford") == "red"
 
 	assert not schoolcolor.hits_node(blueleaf, "Stanford")
 	assert schoolcolor.hits_node(blueleaf, "Cal")
