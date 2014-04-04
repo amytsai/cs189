@@ -16,7 +16,7 @@ class DecisionTree:
 	def check_valid(self):
 		return self.leaf_value is not None or (self.nodes and len(self.nodes) > 1) # either we can make a choice or we're a leaf
 
-	def choice(self, obj):
+	def choose(self, obj):
 		cur_node = self
 		while cur_node.leaf_value is None:
 			index = self.fn(obj)
@@ -29,14 +29,14 @@ class DecisionTree:
 		return cur_node.leaf_value
 
 	@staticmethod
-	def make_leaf(leaf_value):
+	def leaf(leaf_value):
 		return DecisionTree(None, None, leaf_value)
 
 
 
 def sanity_check():
-	blueleaf = DecisionTree.make_leaf("blue")
-	redleaf = DecisionTree.make_leaf("red")
+	blueleaf = DecisionTree.leaf("blue")
+	redleaf = DecisionTree.leaf("red")
 	print blueleaf
 	print redleaf
 
@@ -55,9 +55,9 @@ def sanity_check():
 	print schoolcolor
 	print nschoolcolor
 
-	print "Cal is " + schoolcolor.choice("Cal")
-	print "Cal is " + nschoolcolor.choice("Cal")
-	print "Stanford is " + schoolcolor.choice("Stanford")
-	print "Stanford is " + nschoolcolor.choice("Stanford")
-	print "Everyone else is also " + nschoolcolor.choice("Everyone")
+	print "Cal is " + schoolcolor.choose("Cal")
+	print "Cal is " + nschoolcolor.choose("Cal")
+	print "Stanford is " + schoolcolor.choose("Stanford")
+	print "Stanford is " + nschoolcolor.choose("Stanford")
+	print "Everyone else is also " + nschoolcolor.choose("Everyone")
 
