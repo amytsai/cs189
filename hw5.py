@@ -17,6 +17,8 @@ def main():
 
 	print "entropy of ytrain: "
 	print entropy(ytrain.flatten())
+	DT = grow_tree(xtrain, ytrain)
+	print DT
 
 
 if __name__ == "__main__":

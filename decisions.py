@@ -1,6 +1,7 @@
 import scipy
 from collections import Counter
 from math import *
+import numpy as np
 
 def entropy(binarized_examples):
 	""" calculates the entropy of a list of binarized examples 
@@ -16,14 +17,44 @@ def entropy(binarized_examples):
 	return result
 
 def optimal_split(examples_X, examples_Y, attribute):
-	""" TODO: find the optimal split point of an attribute given examples and
+	""" Find the optimal split point of an attribute given examples and
 		labels
 
 		For the attribute, sort values and calculate infoGain continuing to increment
 		until the infoGain stops improving
 	"""
+	X = examples_X[:, attribute]
+	X = np.sort(X)
+	print X
+	last = 0;
+	for split in X:
+
+		I = infoGain(examples_X, examples_Y, attribute, split)
+		print "split: ", split, "infogain: ", I
+		if (I - last) < 0: # infoGain did not improve
+			return split
+		else:
+			last = I
+
 	return 0.0
 
+def split_attribute(examples_X, examples_Y):
+	""" returns a list containing
+		[0]: split attribute index
+		[1]: the value to split at """
+	numAttributes = examples_X.shape[1]
+	infoGains = np.zeros(numAttributes)
+	splits = np.zeros(numAttributes)
+	for attr in range(0, numAttributes):
+		print "trying attr: " ,attr
+		# calcuate information gain of splitting at each attribute optimally
+		split = optimal_split(examples_X, examples_Y, attr)
+		print "optimal split for attr " , attr  , " is " , split
+		splits[attr] = split
+		infoGains[attr] = infoGain(examples_X, examples_Y, attr, split)
+
+	result = np.argmax(infoGains)
+	return (result, splits[result])
 
 def binarize(examples_X, attribute, split):
 	""" returns boolean array of whether attribute is > split """
@@ -38,14 +69,14 @@ def infoGain(examples_X, examples_Y, attribute, split):
 	H_Y1 = entropy(examples_Y.flatten()[X==1]) #entropy Y | X = 1
 	H_Y0 = entropy(examples_Y.flatten()[X==0]) #entropy Y | X = 0
 
-	return H_Y - P_x0 * H_Y0 + P_x1 * H_Y1
+	return H_Y - P_x0 * H_Y0 - P_x1 * H_Y1
 
 class DecisionTree:
 
-	def __init__(self, fn, nodes = None, leaf_value = None):
-		self.fn = fn
-		self.nodes = nodes
-		self.leaf_value = leaf_value
+	def __init__(self, split, left = None, right = None):
+		self.split = split
+		self.left = left
+		self.right = right
 
 	def __str__(self):
 		if self.nodes: # if there's something in nodes
@@ -71,6 +102,27 @@ class DecisionTree:
 	@staticmethod
 	def leaf(leaf_value):
 		return DecisionTree(None, None, leaf_value)
+
+def grow_tree(examples_X, examples_Y):
+	if(sum(examples_Y.flatten()) == 0): # if all labels are 0
+		return DecisionTree(0)
+	elif(sum(examples_Y.flatten()) == len(examples_Y.flatten())): # if all labels are 1
+		return DecisionTree(1)
+	else:
+		print "looking for optimal split attribute"
+		sa = split_attribute(examples_X, examples_Y);
+		attribute = sa[0]
+		split = sa[1]
+		print "attribute = " + attribute
+		print "split = " + split
+		indices = binarize(examples_X, attribute, split)
+		Set1X = examples_X[indices]
+		Set1Y = examples_Y[indices]
+		indices = np.invert(indices)
+		Set0X  = examples_X[indices]
+		Set0Y  = examples_Y[indices]
+
+		return DecisionTree(split, grow_tree(Set0X, Set0Y), grow_tree(Set1X, Set1Y))
 
 class RandomForest:
 
