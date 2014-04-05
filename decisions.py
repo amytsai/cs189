@@ -106,6 +106,9 @@ class DecisionTree:
 		return DecisionTree(None, None, leaf_value)
 
 def grow_tree(examples_X, examples_Y):
+	"""
+	function that actually builds the decision tree. yay
+	"""
 	if(sum(examples_Y.flatten()) == 0): # if all labels are 0
 		return DecisionTree(0)
 	elif(sum(examples_Y.flatten()) == len(examples_Y.flatten())): # if all labels are 1
