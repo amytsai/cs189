@@ -26,15 +26,17 @@ def optimal_split(examples_X, examples_Y, attribute):
 	X = examples_X[:, attribute]
 	X = np.sort(X)
 	print X
-	last = 0;
-	for split in X:
-
+	last_I= 0;
+	last_split = float("-inf")
+	for i in range(0, len(X)):
+		split = X[np.argmax(X > last_split)]
 		I = infoGain(examples_X, examples_Y, attribute, split)
 		print "split: ", split, "infogain: ", I
-		if (I - last) < 0: # infoGain did not improve
+		if (I - last_I) < 0: # infoGain did not improve
 			return split
 		else:
-			last = I
+			last_I = I
+			last_split = split
 
 	return 0.0
 
