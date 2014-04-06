@@ -105,6 +105,27 @@ class DecisionTree:
 	def leaf(leaf_value):
 		return DecisionTree(None, None, leaf_value)
 
+	# determines if an object will get to a specific node in this DecisionTree
+	def hits_node(self, node, obj):
+		cur_node = self
+		if cur_node is node:
+			return True
+		while cur_node.leaf_value is None:
+			index = self.fn(obj)
+			if index:
+				if index is True:
+					index = 1
+				cur_node = cur_node.nodes[index]
+			else:
+				cur_node = cur_node.nodes[0]
+			if cur_node is node:
+				return True
+		return False
+
+	# takes a list of possible objects, and returns only those that encounter a specific node
+	def filter_by_node(self, node, list_of_obj):
+		return filter(lambda x: self.hits_node(node, x), list_of_obj)
+
 def grow_tree(examples_X, examples_Y):
 	"""
 	function that actually builds the decision tree. yay
@@ -145,35 +166,34 @@ class RandomForest:
 
 
 def sanity_check():
-	blueleaf = DecisionTree.leaf("blue")
-	redleaf = DecisionTree.leaf("red")
-	print blueleaf
-	print redleaf
-
 	def isStanford(s):
 		if s == "Stanford":
 			return True
 		return False
-
 	def isStanfordNumerical(s):
 		if s == "Stanford":
 			return 1
 		return 0
-
+		
+	blueleaf = DecisionTree.leaf("blue")
+	redleaf = DecisionTree.leaf("red")
 	schoolcolor = DecisionTree(isStanford, (blueleaf, redleaf))
 	nschoolcolor = DecisionTree(isStanfordNumerical, (blueleaf, redleaf))
-	print schoolcolor
-	print nschoolcolor
 	forest = RandomForest((schoolcolor, nschoolcolor))
-	print forest
 
-	print "Cal is " + schoolcolor.choose("Cal")
-	print "Cal is " + nschoolcolor.choose("Cal")
-	print "Stanford is " + schoolcolor.choose("Stanford")
-	print "Stanford is " + nschoolcolor.choose("Stanford")
-	print "Everyone else is also " + nschoolcolor.choose("Everyone")
+	assert schoolcolor.choose("Cal") == "blue"
+	assert nschoolcolor.choose("Cal") == "blue"
+	assert schoolcolor.choose("Stanford") == "red"
+	assert nschoolcolor.choose("Stanford") == "red"
+	assert nschoolcolor.choose("Everyone") == "blue"
 
-	print "The forest thinks that Cal is " + forest.choose("Cal")
-	print "The forest thinks that Stanford is " + forest.choose("Stanford")
+	assert forest.choose("Cal") == "blue"
+	assert forest.choose("Stanford") == "red"
+
+	assert not schoolcolor.hits_node(blueleaf, "Stanford")
+	assert schoolcolor.hits_node(blueleaf, "Cal")
+	a = ["Cal", "Stanford", "Harvard", "MIT"]
+	assert schoolcolor.filter_by_node(blueleaf, a) == ["Cal", "Harvard", "MIT"]
+	assert schoolcolor.filter_by_node(redleaf, a) == ["Stanford"]
 
 s = sanity_check
