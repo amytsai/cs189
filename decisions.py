@@ -61,12 +61,14 @@ def optimal_split(examples_X, examples_Y, attribute):
 			last_I = I
 			last_split = split
 
-	return 0.0, last_I
+	second_largest = X[np.argmax(X > 0.0)]
+	return (0.0 + second_largest)/2, last_I
 
 def split_attribute(examples_X, examples_Y):
 	""" returns a list containing
 		[0]: split attribute index
-		[1]: the value to split at """
+		[1]: the value to split at
+		if there is 0 information gain from splitting on any of the attributes, return -1"""
 	assert not sum(examples_Y.flatten()) == 0
 	assert not sum(examples_Y.flatten()) == len(examples_Y.flatten())
 	numAttributes = examples_X.shape[1]
@@ -80,8 +82,11 @@ def split_attribute(examples_X, examples_Y):
 		splits[attr] = split
 		infoGains[attr] = gain
 
-	result = np.argmax(infoGains)
-	return (result, splits[result])
+	if(sum(infoGains) == 0.0): # no infogain from splitting anymore
+		return (-1, -1)
+	else:
+		result = np.argmax(infoGains)
+		return (result, splits[result])
 
 
 class DecisionTree:
@@ -162,20 +167,28 @@ def grow_tree(examples_X, examples_Y, depth = 0):
 		return leaf(1)
 	else:
 		print "Current entropy = %f" % entropy(examples_Y.flatten())
-		print "looking for optimal split attribute"
+		#print "looking for optimal split attribute"
 		sa = split_attribute(examples_X, examples_Y);
 		attribute = sa[0]
 		split = sa[1]
-		print "attribute = " + str(attribute)
-		print "split = " + str(split)
-		indices = binarize(examples_X, attribute, split)
-		Set1X = examples_X[indices]
-		Set1Y = examples_Y[indices]
-		indices = np.invert(indices)
-		Set0X  = examples_X[indices]
-		Set0Y  = examples_Y[indices]
+		if(attribute != -1 and split != -1):
+			print "attribute = " + str(attribute)
+			print "split = " + str(split)
+			indices = binarize(examples_X, attribute, split)
+			Set1X = examples_X[indices]
+			Set1Y = examples_Y[indices]
+			indices = np.invert(indices)
+			Set0X  = examples_X[indices]
+			Set0Y  = examples_Y[indices]
 
-		return DecisionTree(attribute, split, lambda x: x, grow_tree(Set0X, Set0Y, depth + 1), grow_tree(Set1X, Set1Y, depth + 1))
+			return DecisionTree(attribute, split, lambda x: x, grow_tree(Set0X, Set0Y, depth + 1), grow_tree(Set1X, Set1Y, depth + 1))
+		else:
+			P = sum(examples_Y.flatten())/len(examples_Y.flatten())
+			print "Can't perform any more splits; P = ", P
+			if P > .5:
+				return leaf(1)
+			else:
+				return leaf(0)
 
 class RandomForest:
 
