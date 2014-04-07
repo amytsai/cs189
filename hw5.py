@@ -8,9 +8,11 @@ KFOLD = 4
 
 leaf = DecisionTree.leaf # for convenience
 def train(data, labels):
+	"""train a regular decision tree"""
 	return grow_tree(data,labels)
 
 def predict(data, labels, DT):
+	"""predict using a regular decision tree"""
 	error = 0
 	predictions = np.zeros(data.shape[0])
 	for ex in xrange(0, data.shape[0]):
@@ -22,6 +24,39 @@ def predict(data, labels, DT):
 	print "test error rate = ", error_rate
 	return predictions
 
+def train_rand_forest(data, labels, T, N ,m ):
+	"""
+	Train random forest
+	T: number of tree
+	N: number of samples per tree
+	m: number of attributes sampled per node
+	"""
+	trees = []
+
+
+def cross_validate(k, data, labels, train_fn = train, predict_fn = predict):
+	print "Beginning %u-fold cross-validation..." % k
+	random_classes = np.random.random_integers(0, k - 1, len(data))
+	cross_trees = []
+	errors = []
+	for i in xrange(k):
+		print "Cross-validation iteration %u" % i
+		train_indices = (random_classes != i).nonzero()
+		test_indices = (random_classes == i).nonzero() # apparently boolean advanced indexing is faster than this, but meh :(
+		train_x = data[train_indices]
+		train_y = labels[train_indices]
+		test_x = data[test_indices]
+		test_y = labels[test_indices]
+		print "Growing tree..."
+		tree = train_fn(train_x, train_y)
+		print "Tree grown. "
+		error_rate = predict_fn(test_x, test_y, tree)
+		print "Error rate: " + str(error_rate)
+		errors.append(error_rate)
+		cross_trees.append(tree)
+
+	print "Total average error rate: " + str(sum(errors) / len(errors))
+
 def main():
 	"""
 	just some testing stuff for now
@@ -32,14 +67,12 @@ def main():
 	xtrain = spam['Xtrain']
 	ytrain = spam['ytrain']
 
-	print "entropy of ytrain: "
-	print entropy(ytrain.flatten())
-	DT = grow_tree(xtrain, ytrain)
-	error = 0.0
-	for ex in range(0, xtrain.shape[0]):
-		prediction = DT.choose(xtrain[ex])
-		if(prediction != ytrain[ex, 0]):
-			error += 1
+	cross_validate(4, xtrain, ytrain)
+
+	"""
+	OLD STUFF
+	DT = train(xtrain, ytrain)
+	error = predict(xtrain,ytrain, DT)
 	print "training error rate = ",  error/ float(xtrain.shape[0])
 
 	print "Beginning %u-fold cross-validation..." % KFOLD
@@ -55,7 +88,7 @@ def main():
 		test_x = xtrain[test_indices]
 		test_y = ytrain[test_indices]
 		print "Growing tree..."
-		tree = grow_tree(train_x, train_y)
+		tree = train(train_x, train_y)
 		print "Tree grown. "
 		error = 0
 		for i in xrange(len(test_x)):
@@ -68,6 +101,7 @@ def main():
 		cross_trees.append(tree)
 
 	print "Total average error rate: " + str(sum(errors) / len(errors))
+	"""
 
 	code.interact(local = locals())
 
