@@ -113,14 +113,14 @@ class DecisionTree:
 	def _greater_than_split(self, features):
 		assert not self.is_leaf()
 		feature = features[self.attribute]
-		return feature > split
+		return feature > self.split
 
 	def choose(self, obj):
 		cur_node = self
 		if not self.is_leaf():
 			features = self.extractor(obj)
-		while not self.is_leaf:
-			if _greater_than_split(features):
+		while not cur_node.is_leaf():
+			if self._greater_than_split(features):
 				cur_node = cur_node.right
 			else:
 				cur_node = cur_node.left
