@@ -50,14 +50,14 @@ def optimal_split(examples_X, examples_Y, attribute):
 	X = np.sort(X)
 	print X
 	if sum(X) == 0 or sum(X) == 0.0:
-		return 0.0
-	last_I= 0;
+		return 0.0, 0.0
+	last_I= 0.0;
 	last_split = float("-inf")
 	for i in range(0, len(X)):
 		split = X[np.argmax(X > last_split)]
 		I = infoGain(examples_X, examples_Y, attribute, split)
 		print "split: ", split, "infogain: ", I
-		if (I - last_I) < 0: # infoGain did not improve
+		if I < last_I: # infoGain did not improve
 			return split, last_I
 		else:
 			last_I = I
@@ -150,10 +150,12 @@ class DecisionTree:
 
 leaf = DecisionTree.leaf
 
-def grow_tree(examples_X, examples_Y):
+def grow_tree(examples_X, examples_Y, depth = 0):
 	"""
 	function that actually builds the decision tree. yay
 	"""
+	print "DEPTH = %u" % depth
+
 	if(sum(examples_Y.flatten()) == 0): # if all labels are 0
 		return leaf(0)
 	elif(sum(examples_Y.flatten()) == len(examples_Y.flatten())): # if all labels are 1
@@ -172,7 +174,7 @@ def grow_tree(examples_X, examples_Y):
 		Set0X  = examples_X[indices]
 		Set0Y  = examples_Y[indices]
 
-		return DecisionTree(attribute, split, lambda x: x, grow_tree(Set0X, Set0Y), grow_tree(Set1X, Set1Y))
+		return DecisionTree(attribute, split, lambda x: x, grow_tree(Set0X, Set0Y, depth + 1), grow_tree(Set1X, Set1Y, depth + 1))
 
 class RandomForest:
 
