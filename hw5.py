@@ -67,12 +67,17 @@ def cross_validate(k, data, labels, train_fn = train, predict_fn = predict):
 		print "Growing tree..."
 		tree = train_fn(train_x, train_y)
 		print "Tree grown. "
-		error_rate = predict_fn(test_x, test_y, tree)
+		error = 0
+		for i in xrange(len(test_x)):
+			if predict_fn(test_x[i], tree) != test_y[i]:
+				error += 1
+		error_rate = float(error) / float(len(test_x))
 		print "Error rate: " + str(error_rate)
 		errors.append(error_rate)
 		cross_trees.append(tree)
 
 	print "Total average error rate: " + str(sum(errors) / len(errors))
+	return errors, cross_trees
 
 def main():
 	"""
@@ -84,9 +89,11 @@ def main():
 	xtrain = spam['Xtrain']
 	ytrain = spam['ytrain']
 
-	forest = train_rand_forest(xtrain, ytrain, 10, 400, 15)
-	predict_rand_forest(xtrain, ytrain, forest)
-	#cross_validate(4, xtrain, ytrain)
+	# forest = train_rand_forest(xtrain, ytrain, 10, 400, 15)
+	# predict_rand_forest(xtrain, ytrain, forest)
+	train = lambda x, y: train_rand_forest(x, y, 10, 400, 15)
+	predict = lambda x, tree: tree.choose(x)
+	cross_validate(4, xtrain, ytrain, train, predict)
 
 	"""
 	OLD STUFF
