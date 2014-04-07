@@ -2,6 +2,7 @@ import scipy
 from collections import Counter
 from math import *
 import numpy as np
+import random as rand
 
 def entropy(binarized_examples):
 	""" calculates the entropy of a list of binarized examples
@@ -191,7 +192,7 @@ def grow_tree(examples_X, examples_Y, depth = 0):
 			else:
 				return leaf(0)
 
-def grow_rand_tree(example_X, examples_Y, m, depth = 0):
+def grow_rand_tree(examples_X, examples_Y, m, depth = 0):
 	"""
 	grows a tree where m random attributes are chosen from classificatoin at each level
 	"""
@@ -217,7 +218,7 @@ def grow_rand_tree(example_X, examples_Y, m, depth = 0):
 			Set0X  = examples_X[indices]
 			Set0Y  = examples_Y[indices]
 
-			return DecisionTree(attribute, split, lambda x: x, grow_tree(Set0X, Set0Y, depth + 1), grow_tree(Set1X, Set1Y, depth + 1))
+			return DecisionTree(attribute, split, lambda x: x, grow_rand_tree(Set0X, Set0Y, m, depth + 1), grow_rand_tree(Set1X, Set1Y, m, depth + 1))
 		else:
 			P = sum(examples_Y.flatten())/len(examples_Y.flatten())
 			print "Can't perform any more splits; P = ", P
@@ -225,7 +226,7 @@ def grow_rand_tree(example_X, examples_Y, m, depth = 0):
 				return leaf(1)
 			else:
 				return leaf(0)
-				
+
 class RandomForest:
 
 	def __init__(self, trees):

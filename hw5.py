@@ -3,8 +3,9 @@ import scipy.io as sio
 import numpy as np
 import code
 from decisions import *
+import random as rand
 
-KFOLD = 4
+#KFOLD = 4
 
 leaf = DecisionTree.leaf # for convenience
 def train(data, labels):
@@ -32,7 +33,23 @@ def train_rand_forest(data, labels, T, N ,m ):
 	m: number of attributes sampled per node
 	"""
 	trees = []
+	for t in range(0, T):
+		subset = rand.sample(range(0, data.shape[0]), N)
+		tree = grow_rand_tree(data[subset], labels[subset], m)
+		trees.append(tree)
+	return RandomForest(trees)
 
+def predict_rand_forest(data, labels, forest):
+	error = 0
+	predictions = np.zeros(data.shape[0])
+	for ex in xrange(0, data.shape[0]):
+		prediction = forest.choose(data[ex])
+		predictions[ex] = prediction
+		if(prediction != labels[ex, 0]):
+			error += 1
+	error_rate = error/ float(data.shape[0])
+	print "test error rate = ", error_rate
+	return predictions
 
 def cross_validate(k, data, labels, train_fn = train, predict_fn = predict):
 	print "Beginning %u-fold cross-validation..." % k
@@ -67,7 +84,9 @@ def main():
 	xtrain = spam['Xtrain']
 	ytrain = spam['ytrain']
 
-	cross_validate(4, xtrain, ytrain)
+	forest = train_rand_forest(xtrain, ytrain, 10, 400, 15)
+	predict_rand_forest(xtrain, ytrain, forest)
+	#cross_validate(4, xtrain, ytrain)
 
 	"""
 	OLD STUFF
