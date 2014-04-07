@@ -7,9 +7,12 @@ def entropy(binarized_examples):
 	""" calculates the entropy of a list of binarized examples 
 		returns a floating point number """
 	X = binarized_examples
+	if len(X) == 0:
+		assert False
+		return 0.0
 	P_x1 = sum(X) / float(len(X)) # probability X is true
-	if (P_x1 == 1.0 or P_x1 == 0.0):
-		return 0
+	if P_x1 == 1.0 or P_x1 == 0.0:
+		return 0.0
 	P_x0 = 1 - P_x1 # probability X is false
 	assert P_x1 < 1
 	assert P_x1 > 0
@@ -18,6 +21,23 @@ def entropy(binarized_examples):
 	result = - P_x0 * log(P_x0, 2) 
 
 	return result
+
+def binarize(examples_X, attribute, split):
+	""" returns boolean array of whether attribute is > split """
+	return examples_X[: , attribute] > split
+
+def infoGain(examples_X, examples_Y, attribute, split):
+	H_Y = entropy(examples_Y.flatten())
+	X = binarize(examples_X, attribute, split)
+	P_x1 = sum(X)/float(len(X)) # probability X is true
+	if sum(X) == 0 or sum(X) == len(X):
+		return 0.0
+	assert P_x1 != 1.0 and P_x1 != 0.0
+	P_x0 = 1 - P_x1 # probability X is false
+	H_Y1 = entropy(examples_Y.flatten()[X==1]) #entropy Y | X = 1
+	H_Y0 = entropy(examples_Y.flatten()[X==0]) #entropy Y | X = 0
+
+	return H_Y - P_x0 * H_Y0 - P_x1 * H_Y1
 
 def optimal_split(examples_X, examples_Y, attribute):
 	""" Find the optimal split point of an attribute given examples and
@@ -29,6 +49,8 @@ def optimal_split(examples_X, examples_Y, attribute):
 	X = examples_X[:, attribute]
 	X = np.sort(X)
 	print X
+	if sum(X) == 0 or sum(X) == 0.0:
+		return 0.0
 	last_I= 0;
 	last_split = float("-inf")
 	for i in range(0, len(X)):
@@ -63,20 +85,6 @@ def split_attribute(examples_X, examples_Y):
 	result = np.argmax(infoGains)
 	return (result, splits[result])
 
-def binarize(examples_X, attribute, split):
-	""" returns boolean array of whether attribute is > split """
-	return examples_X[: , attribute] > split
-
-
-def infoGain(examples_X, examples_Y, attribute, split):
-	H_Y = entropy(examples_Y.flatten())
-	X = binarize(examples_X, attribute, split)
-	P_x1 = sum(X)/float(len(X)) # probability X is true
-	P_x0 = 1 - P_x1 # probability X is false
-	H_Y1 = entropy(examples_Y.flatten()[X==1]) #entropy Y | X = 1
-	H_Y0 = entropy(examples_Y.flatten()[X==0]) #entropy Y | X = 0
-
-	return H_Y - P_x0 * H_Y0 - P_x1 * H_Y1
 
 class DecisionTree:
 
@@ -155,8 +163,8 @@ def grow_tree(examples_X, examples_Y):
 		sa = split_attribute(examples_X, examples_Y);
 		attribute = sa[0]
 		split = sa[1]
-		print "attribute = " + attribute
-		print "split = " + split
+		print "attribute = " + str(attribute)
+		print "split = " + str(split)
 		indices = binarize(examples_X, attribute, split)
 		Set1X = examples_X[indices]
 		Set1Y = examples_Y[indices]
