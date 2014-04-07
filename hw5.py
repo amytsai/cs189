@@ -1,6 +1,7 @@
 import scipy
 import scipy.io as sio
 import numpy as np
+import code
 from decisions import *
 
 leaf = DecisionTree.leaf # for convenience
@@ -19,6 +20,7 @@ def main():
 	print entropy(ytrain.flatten())
 	DT = grow_tree(xtrain, ytrain)
 	print DT
+	code.interact(local = locals())
 
 
 if __name__ == "__main__":

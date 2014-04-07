@@ -58,12 +58,12 @@ def optimal_split(examples_X, examples_Y, attribute):
 		I = infoGain(examples_X, examples_Y, attribute, split)
 		print "split: ", split, "infogain: ", I
 		if (I - last_I) < 0: # infoGain did not improve
-			return split
+			return split, last_I
 		else:
 			last_I = I
 			last_split = split
 
-	return 0.0
+	return 0.0, last_I
 
 def split_attribute(examples_X, examples_Y):
 	""" returns a list containing
@@ -77,10 +77,10 @@ def split_attribute(examples_X, examples_Y):
 	for attr in range(0, numAttributes):
 		print "trying attr: " ,attr
 		# calcuate information gain of splitting at each attribute optimally
-		split = optimal_split(examples_X, examples_Y, attr)
+		split, gain = optimal_split(examples_X, examples_Y, attr)
 		print "optimal split for attr " , attr  , " is " , split
 		splits[attr] = split
-		infoGains[attr] = infoGain(examples_X, examples_Y, attr, split)
+		infoGains[attr] = gain
 
 	result = np.argmax(infoGains)
 	return (result, splits[result])
