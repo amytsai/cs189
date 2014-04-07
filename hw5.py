@@ -5,9 +5,9 @@ import code
 from decisions import *
 
 leaf = DecisionTree.leaf # for convenience
-def train(data, labels)
+def train(data, labels):
 	return grow_tree(data,labels)
-	
+
 def predict(data, labels, DT):
 	error = 0
 	predictions = np.zeros(data.shape[0])
