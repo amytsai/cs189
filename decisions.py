@@ -7,12 +7,15 @@ def entropy(binarized_examples):
 	""" calculates the entropy of a list of binarized examples 
 		returns a floating point number """
 	X = binarized_examples
-	result = 0
-	P_x1 = sum(X)/float(len(X)) # probability X is true
+	P_x1 = sum(X) / float(len(X)) # probability X is true
+	if (P_x1 == 1.0 or P_x1 == 0.0):
+		return 0
 	P_x0 = 1 - P_x1 # probability X is false
+	assert P_x1 < 1
+	assert P_x1 > 0
 
-	result -= P_x1 * log(P_x1, 2) 
-	result -= P_x0 * log(P_x0, 2) 
+	result = - P_x1 * log(P_x1, 2) 
+	result = - P_x0 * log(P_x0, 2) 
 
 	return result
 
@@ -44,6 +47,8 @@ def split_attribute(examples_X, examples_Y):
 	""" returns a list containing
 		[0]: split attribute index
 		[1]: the value to split at """
+	assert not sum(examples_Y.flatten()) == 0
+	assert not sum(examples_Y.flatten()) == len(examples_Y.flatten())
 	numAttributes = examples_X.shape[1]
 	infoGains = np.zeros(numAttributes)
 	splits = np.zeros(numAttributes)
@@ -75,37 +80,46 @@ def infoGain(examples_X, examples_Y, attribute, split):
 
 class DecisionTree:
 
-	def __init__(self, split, left = None, right = None):
+	def __init__(self, attribute = None, split = None, extractor = lambda x: x, left = None, right = None):
+		self.attribute = attribute
 		self.split = split
+		self.extractor = extractor
 		self.left = left
 		self.right = right
 
 	def __str__(self):
-		if self.nodes: # if there's something in nodes
-			return '<DecisionTree with %u child nodes>' % len(self.nodes)
+		if not self.is_leaf: 
+			return '<DecisionTree with %u child nodes>' % (self.left + self.right)
 		else:
 			return '<DecisionTree leaf with leaf value "' + str(self.leaf_value) + '">'
+
+	def is_leaf(self):
+		return self.left is None and self.right is None
 
 	def check_valid(self):
 		return self.leaf_value is not None or (self.nodes and len(self.nodes) > 1) # either we can make a choice or we're a leaf
 
+	def _greater_than_split(self, features):
+		assert not self.is_leaf
+		feature = features[self.attribute]
+		return feature > split
+
 	def choose(self, obj):
-		cur_node = self
-		while cur_node.leaf_value is None:
-			index = self.fn(obj)
-			if index:
-				if index is True:
-					index = 1
-				cur_node = cur_node.nodes[index]
+		if not self.is_leaf:
+			features = self.extractor(obj)
+		while not self.is_leaf:
+			if _greater_than_split(features):
+				cur_node = cur_node.right
 			else:
-				cur_node = cur_node.nodes[0]
-		return cur_node.leaf_value
+				cur_node = cur_node.left
+		return cur_node.split
 
 	@staticmethod
 	def leaf(leaf_value):
-		return DecisionTree(None, None, leaf_value)
+		return DecisionTree(split = leaf_value)
 
 	# determines if an object will get to a specific node in this DecisionTree
+	## BROKEN after structure change
 	def hits_node(self, node, obj):
 		cur_node = self
 		if cur_node is node:
@@ -126,14 +140,16 @@ class DecisionTree:
 	def filter_by_node(self, node, list_of_obj):
 		return filter(lambda x: self.hits_node(node, x), list_of_obj)
 
+leaf = DecisionTree.leaf
+
 def grow_tree(examples_X, examples_Y):
 	"""
 	function that actually builds the decision tree. yay
 	"""
 	if(sum(examples_Y.flatten()) == 0): # if all labels are 0
-		return DecisionTree(0)
+		return leaf(0)
 	elif(sum(examples_Y.flatten()) == len(examples_Y.flatten())): # if all labels are 1
-		return DecisionTree(1)
+		return leaf(1)
 	else:
 		print "looking for optimal split attribute"
 		sa = split_attribute(examples_X, examples_Y);
@@ -148,7 +164,7 @@ def grow_tree(examples_X, examples_Y):
 		Set0X  = examples_X[indices]
 		Set0Y  = examples_Y[indices]
 
-		return DecisionTree(split, grow_tree(Set0X, Set0Y), grow_tree(Set1X, Set1Y))
+		return DecisionTree(attribute, split, lambda x: x, grow_tree(Set0X, Set0Y), grow_tree(Set1X, Set1Y))
 
 class RandomForest:
 
@@ -197,3 +213,20 @@ def sanity_check():
 	assert schoolcolor.filter_by_node(redleaf, a) == ["Stanford"]
 
 s = sanity_check
+
+import sys
+
+def info(type, value, tb):
+   if hasattr(sys, 'ps1') or not sys.stderr.isatty() or type != AssertionError:
+      # we are in interactive mode or we don't have a tty-like
+      # device, so we call the default hook
+      sys.__excepthook__(type, value, tb)
+   else:
+      import traceback, pdb
+      # we are NOT in interactive mode, print the exception...
+      traceback.print_exception(type, value, tb)
+      print
+      # ...then start the debugger in post-mortem mode.
+      pdb.pm()
+
+sys.excepthook = info
