@@ -4,7 +4,7 @@ from math import *
 import numpy as np
 
 def entropy(binarized_examples):
-	""" calculates the entropy of a list of binarized examples 
+	""" calculates the entropy of a list of binarized examples
 		returns a floating point number """
 	X = binarized_examples
 	if len(X) == 0:
@@ -13,12 +13,11 @@ def entropy(binarized_examples):
 	P_x1 = sum(X) / float(len(X)) # probability X is true
 	if P_x1 == 1.0 or P_x1 == 0.0:
 		return 0.0
-	P_x0 = 1 - P_x1 # probability X is false
+	P_x0 = 1.0 - P_x1 # probability X is false
 	assert P_x1 < 1
 	assert P_x1 > 0
-
-	result = - P_x1 * log(P_x1, 2) 
-	result = - P_x0 * log(P_x0, 2) 
+	result = - P_x1 * log(P_x1, 2)
+	result -= P_x0 * log(P_x0, 2)
 
 	return result
 
@@ -47,18 +46,17 @@ def optimal_split(examples_X, examples_Y, attribute):
 		until the infoGain stops improving
 	"""
 	X = examples_X[:, attribute]
-	X = np.sort(X)
-	print X
+	X = np.sort(X) #sorted attributes
 	if sum(X) == 0 or sum(X) == 0.0:
 		return 0.0, 0.0
 	last_I= 0.0;
 	last_split = float("-inf")
 	for i in range(0, len(X)):
-		split = X[np.argmax(X > last_split)]
+		split = X[np.argmax(X > last_split)] #next largest number
 		I = infoGain(examples_X, examples_Y, attribute, split)
-		print "split: ", split, "infogain: ", I
+		#print "split: ", split, "infogain: ", I
 		if I < last_I: # infoGain did not improve
-			return split, last_I
+			return (split + last_split) / 2, last_I #return halfway between current split and last split
 		else:
 			last_I = I
 			last_split = split
@@ -75,10 +73,10 @@ def split_attribute(examples_X, examples_Y):
 	infoGains = np.zeros(numAttributes)
 	splits = np.zeros(numAttributes)
 	for attr in range(0, numAttributes):
-		print "trying attr: " ,attr
+		#print "trying attr: " ,attr
 		# calcuate information gain of splitting at each attribute optimally
 		split, gain = optimal_split(examples_X, examples_Y, attr)
-		print "optimal split for attr " , attr  , " is " , split
+		#print "optimal split for attr " , attr  , " is " , split
 		splits[attr] = split
 		infoGains[attr] = gain
 
@@ -96,7 +94,7 @@ class DecisionTree:
 		self.right = right
 
 	def __str__(self):
-		if not self.is_leaf: 
+		if not self.is_leaf:
 			return '<DecisionTree with %u child nodes>' % (self.left + self.right)
 		else:
 			return '<DecisionTree leaf with leaf value "' + str(self.leaf_value) + '">'
@@ -157,10 +155,13 @@ def grow_tree(examples_X, examples_Y, depth = 0):
 	print "DEPTH = %u" % depth
 
 	if(sum(examples_Y.flatten()) == 0): # if all labels are 0
+		print "I AM A LEAF :DDD"
 		return leaf(0)
 	elif(sum(examples_Y.flatten()) == len(examples_Y.flatten())): # if all labels are 1
+		print "I AM A LEAF :DDD"
 		return leaf(1)
 	else:
+		print "Current entropy = %f" % entropy(examples_Y.flatten())
 		print "looking for optimal split attribute"
 		sa = split_attribute(examples_X, examples_Y);
 		attribute = sa[0]
@@ -200,7 +201,7 @@ def sanity_check():
 		if s == "Stanford":
 			return 1
 		return 0
-		
+
 	blueleaf = DecisionTree.leaf("blue")
 	redleaf = DecisionTree.leaf("red")
 	schoolcolor = DecisionTree(isStanford, (blueleaf, redleaf))
