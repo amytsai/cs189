@@ -7,9 +7,7 @@ def entropy(binarized_examples):
 	""" calculates the entropy of a list of binarized examples
 		returns a floating point number """
 	X = binarized_examples
-	if len(X) == 0:
-		assert False
-		return 0.0
+	assert len(X) != 0
 	P_x1 = sum(X) / float(len(X)) # probability X is true
 	if P_x1 == 1.0 or P_x1 == 0.0:
 		return 0.0
@@ -28,8 +26,9 @@ def binarize(examples_X, attribute, split):
 def infoGain(examples_X, examples_Y, attribute, split):
 	H_Y = entropy(examples_Y.flatten())
 	X = binarize(examples_X, attribute, split)
-	P_x1 = sum(X)/float(len(X)) # probability X is true
-	if sum(X) == 0 or sum(X) == len(X):
+	sX = sum(X)
+	P_x1 = sX/float(len(X)) # probability X is true
+	if sX == 0 or sX == len(X):
 		return 0.0
 	assert P_x1 != 1.0 and P_x1 != 0.0
 	P_x0 = 1 - P_x1 # probability X is false
@@ -164,7 +163,7 @@ def grow_tree(examples_X, examples_Y, depth = 0):
 		#print "I AM A LEAF :DDD"
 		return leaf(0)
 	elif(sum(examples_Y.flatten()) == len(examples_Y.flatten())): # if all labels are 1
-		print "I AM A 1 LEAF"
+		#print "I AM A 1 LEAF"
 		return leaf(1)
 	else:
 		#print "Current entropy = %f" % entropy(examples_Y.flatten())
