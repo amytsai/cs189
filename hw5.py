@@ -5,8 +5,9 @@ import code
 from decisions import *
 
 leaf = DecisionTree.leaf # for convenience
-error/ xtrain.shape[0]
-
+def train(data, labels)
+	return grow_tree(data,labels)
+	
 def predict(data, labels, DT):
 	error = 0
 	predictions = np.zeros(data.shape[0])
@@ -18,6 +19,8 @@ def predict(data, labels, DT):
 	error_rate = error/ data.shape[0]
 	print "test error rate = ", error_rate
 	return predictions
+
+
 
 def main():
 	"""
