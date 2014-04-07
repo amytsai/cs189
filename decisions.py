@@ -111,12 +111,13 @@ class DecisionTree:
 		return self.leaf_value is not None or (self.nodes and len(self.nodes) > 1) # either we can make a choice or we're a leaf
 
 	def _greater_than_split(self, features):
-		assert not self.is_leaf
+		assert not self.is_leaf()
 		feature = features[self.attribute]
 		return feature > split
 
 	def choose(self, obj):
-		if not self.is_leaf:
+		cur_node = self
+		if not self.is_leaf():
 			features = self.extractor(obj)
 		while not self.is_leaf:
 			if _greater_than_split(features):
@@ -160,20 +161,20 @@ def grow_tree(examples_X, examples_Y, depth = 0):
 	print "DEPTH = %u" % depth
 
 	if(sum(examples_Y.flatten()) == 0): # if all labels are 0
-		print "I AM A LEAF :DDD"
+		#print "I AM A LEAF :DDD"
 		return leaf(0)
 	elif(sum(examples_Y.flatten()) == len(examples_Y.flatten())): # if all labels are 1
-		print "I AM A LEAF :DDD"
+		#print "I AM A LEAF :DDD"
 		return leaf(1)
 	else:
-		print "Current entropy = %f" % entropy(examples_Y.flatten())
+		#print "Current entropy = %f" % entropy(examples_Y.flatten())
 		#print "looking for optimal split attribute"
 		sa = split_attribute(examples_X, examples_Y);
 		attribute = sa[0]
 		split = sa[1]
 		if(attribute != -1 and split != -1):
-			print "attribute = " + str(attribute)
-			print "split = " + str(split)
+			#print "attribute = " + str(attribute)
+			#print "split = " + str(split)
 			indices = binarize(examples_X, attribute, split)
 			Set1X = examples_X[indices]
 			Set1Y = examples_Y[indices]
