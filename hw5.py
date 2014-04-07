@@ -16,7 +16,7 @@ def predict(data, labels, DT):
 		predictions[ex] = prediction
 		if(prediction != labels[ex, 0]):
 			error += 1
-	error_rate = error/ data.shape[0]
+	error_rate = error/ float(data.shape[0])
 	print "test error rate = ", error_rate
 	return predictions
 
@@ -38,7 +38,7 @@ def main():
 		prediction = DT.choose(xtrain[ex])
 		if(prediction != ytrain[ex, 0]):
 			error += 1
-	print "training error rate = ",  error/ xtrain.shape[0]
+	print "training error rate = ",  error/ float(xtrain.shape[0])
 
 	#print DT
 	code.interact(local = locals())

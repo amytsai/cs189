@@ -120,7 +120,7 @@ class DecisionTree:
 		if not self.is_leaf():
 			features = self.extractor(obj)
 		while not cur_node.is_leaf():
-			if self._greater_than_split(features):
+			if cur_node._greater_than_split(features):
 				cur_node = cur_node.right
 			else:
 				cur_node = cur_node.left
@@ -164,7 +164,7 @@ def grow_tree(examples_X, examples_Y, depth = 0):
 		#print "I AM A LEAF :DDD"
 		return leaf(0)
 	elif(sum(examples_Y.flatten()) == len(examples_Y.flatten())): # if all labels are 1
-		#print "I AM A LEAF :DDD"
+		print "I AM A 1 LEAF"
 		return leaf(1)
 	else:
 		#print "Current entropy = %f" % entropy(examples_Y.flatten())
