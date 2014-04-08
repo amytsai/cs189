@@ -4,10 +4,10 @@ import numpy as np
 import code
 from decisions import *
 import random as rand
+from multiprocessing import Pool
 
 #KFOLD = 4
 
-leaf = DecisionTree.leaf # for convenience
 def train(data, labels):
 	"""train a regular decision tree"""
 	return grow_tree(data,labels)
@@ -25,6 +25,18 @@ def predict(data, labels, DT):
 	print "test error rate = ", error_rate
 	return predictions
 
+def sample(*args):
+	return rand.sample(*args)
+
+def _train_rand_tree(arg):
+	data = arg[0]
+	labels = arg[1]
+	N = arg[2]
+	m = arg[3]
+	subset = sample(range(0, data.shape[0]), N)
+	tree = grow_rand_tree(data[subset], labels[subset], m)
+	return tree
+
 def train_rand_forest(data, labels, T, N ,m ):
 	"""
 	Train random forest
@@ -32,11 +44,10 @@ def train_rand_forest(data, labels, T, N ,m ):
 	N: number of samples per tree
 	m: number of attributes sampled per node
 	"""
-	trees = []
-	for t in range(0, T):
-		subset = rand.sample(range(0, data.shape[0]), N)
-		tree = grow_rand_tree(data[subset], labels[subset], m)
-		trees.append(tree)
+	pool = Pool()
+	iterable = [(data, labels, N, m) for i in xrange(T)]
+	trees = pool.map(_train_rand_tree, iterable)
+	pool.close()
 	return RandomForest(trees)
 
 def predict_rand_forest(data, labels, forest):

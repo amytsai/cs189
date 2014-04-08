@@ -88,10 +88,12 @@ def split_attribute(examples_X, examples_Y):
 		result = np.argmax(infoGains)
 		return (result, splits[result])
 
+def identity(x):
+	return x
 
 class DecisionTree:
 
-	def __init__(self, attribute = None, split = None, extractor = lambda x: x, left = None, right = None):
+	def __init__(self, attribute = None, split = None, extractor = identity, left = None, right = None):
 		self.attribute = attribute
 		self.split = split
 		self.extractor = extractor
@@ -126,10 +128,6 @@ class DecisionTree:
 				cur_node = cur_node.left
 		return cur_node.split
 
-	@staticmethod
-	def leaf(leaf_value):
-		return DecisionTree(split = leaf_value)
-
 	# determines if an object will get to a specific node in this DecisionTree
 	## BROKEN after structure change
 	def hits_node(self, node, obj):
@@ -152,7 +150,8 @@ class DecisionTree:
 	def filter_by_node(self, node, list_of_obj):
 		return filter(lambda x: self.hits_node(node, x), list_of_obj)
 
-leaf = DecisionTree.leaf
+def leaf(leaf_value):
+	return DecisionTree(split = leaf_value)
 
 def grow_tree(examples_X, examples_Y, depth = 0):
 	"""
@@ -182,7 +181,7 @@ def grow_tree(examples_X, examples_Y, depth = 0):
 			Set0X  = examples_X[indices]
 			Set0Y  = examples_Y[indices]
 
-			return DecisionTree(attribute, split, lambda x: x, grow_tree(Set0X, Set0Y, depth + 1), grow_tree(Set1X, Set1Y, depth + 1))
+			return DecisionTree(attribute, split, identity, grow_tree(Set0X, Set0Y, depth + 1), grow_tree(Set1X, Set1Y, depth + 1))
 		else:
 			P = sum(examples_Y.flatten())/len(examples_Y.flatten())
 			print "Can't perform any more splits; P = ", P
@@ -217,7 +216,7 @@ def grow_rand_tree(examples_X, examples_Y, m, depth = 0):
 			Set0X  = examples_X[indices]
 			Set0Y  = examples_Y[indices]
 
-			return DecisionTree(attribute, split, lambda x: x, grow_rand_tree(Set0X, Set0Y, m, depth + 1), grow_rand_tree(Set1X, Set1Y, m, depth + 1))
+			return DecisionTree(attribute, split, identity, grow_rand_tree(Set0X, Set0Y, m, depth + 1), grow_rand_tree(Set1X, Set1Y, m, depth + 1))
 		else:
 			P = sum(examples_Y.flatten())/len(examples_Y.flatten())
 			print "Can't perform any more splits; P = ", P
