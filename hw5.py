@@ -110,9 +110,25 @@ def main():
 
 	# forest = train_rand_forest(xtrain, ytrain, 10, 400, 15)
 	# predict_rand_forest(xtrain, ytrain, forest)
-	train = lambda x, y: train_rand_forest(x, y, 10, 400, 15)
+	# 7.2%:
+	# train = lambda x, y: train_rand_forest(x, y, 15, 500, 25)
+	# 6.3%:
+	# train = lambda x, y: train_rand_forest(x, y, 15, 500, 25)
+	# 6.1%:
+	# train = lambda x, y: train_rand_forest(x, y, 15, 600, 20)
+	# 7.5%:
+	# train = lambda x, y: train_rand_forest(x, y, 15, 400, 20)
+	# 6.2%:
+	# train = lambda x, y: train_rand_forest(x, y, 21, 800, 20)
+	# 6.9%:
+	# train = lambda x, y: train_rand_forest(x, y, 21, 400, 20)
+	# 6.5%:
+	# train = lambda x, y: train_rand_forest(x, y, 21, 600, 20)
+	# 6.1% 
+	# train = lambda x, y: train_rand_forest(x, y, 21, 900, 20)
+	train = lambda x, y: train_rand_forest(x, y, 21, 900, 20)
 	predict = lambda x, tree: tree.choose(x)
-	cross_validate(4, xtrain, ytrain, train, predict)
+	cross_validate(10, xtrain, ytrain, train, predict)
 
 	"""
 	OLD STUFF
