@@ -4,8 +4,9 @@ import numpy as np
 import code
 from decisions import *
 import random as rand
+import csv
 
-#KFOLD = 4
+KFOLD = 4
 
 leaf = DecisionTree.leaf # for convenience
 def train(data, labels):
@@ -34,6 +35,7 @@ def train_rand_forest(data, labels, T, N ,m ):
 	"""
 	trees = []
 	for t in range(0, T):
+		#print "Training tree: ", t
 		subset = rand.sample(range(0, data.shape[0]), N)
 		tree = grow_rand_tree(data[subset], labels[subset], m)
 		trees.append(tree)
@@ -48,8 +50,13 @@ def predict_rand_forest(data, labels, forest):
 		if(prediction != labels[ex, 0]):
 			error += 1
 	error_rate = error/ float(data.shape[0])
-	print "test error rate = ", error_rate
+	#print "test error rate = ", error_rate
 	return predictions
+
+def train_boosted(data, labels, its):
+	"""
+	adaboost
+	"""
 
 def cross_validate(k, data, labels, train_fn = train, predict_fn = predict):
 	print "Beginning %u-fold cross-validation..." % k
@@ -83,16 +90,18 @@ def main():
 	xtest = spam['Xtest']
 	xtrain = spam['Xtrain']
 	ytrain = spam['ytrain']
+	T = 20
+	N = 800
+	m = 15
 
-	forest = train_rand_forest(xtrain, ytrain, 10, 400, 15)
-	predict_rand_forest(xtrain, ytrain, forest)
+	forest = train_rand_forest(xtrain, ytrain, T, N, m)
+	predictions = predict_rand_forest(xtest, ytrain[:xtest.shape[0]], forest) #dummy labels
+	for p in predictions:
+		print p
+
+	#predict_rand_forest(xtrain, ytrain, forest)
 	#cross_validate(4, xtrain, ytrain)
-
 	"""
-	OLD STUFF
-	DT = train(xtrain, ytrain)
-	error = predict(xtrain,ytrain, DT)
-	print "training error rate = ",  error/ float(xtrain.shape[0])
 
 	print "Beginning %u-fold cross-validation..." % KFOLD
 	random_classes = np.random.random_integers(0, KFOLD - 1, len(xtrain))
@@ -107,7 +116,7 @@ def main():
 		test_x = xtrain[test_indices]
 		test_y = ytrain[test_indices]
 		print "Growing tree..."
-		tree = train(train_x, train_y)
+		tree = train_rand_forest(train_x, train_y, T, N, m)
 		print "Tree grown. "
 		error = 0
 		for i in xrange(len(test_x)):
@@ -120,7 +129,7 @@ def main():
 		cross_trees.append(tree)
 
 	print "Total average error rate: " + str(sum(errors) / len(errors))
-	"""
+"""
 
 	code.interact(local = locals())
 

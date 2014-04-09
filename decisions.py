@@ -196,7 +196,7 @@ def grow_rand_tree(examples_X, examples_Y, m, depth = 0):
 	grows a tree where m random attributes are chosen from classificatoin at each level
 	"""
 
-	print "DEPTH = %u" % depth
+	#print "DEPTH = %u" % depth
 	if(sum(examples_Y.flatten()) == 0): # if all labels are 0
 		return leaf(0)
 	elif(sum(examples_Y.flatten()) == len(examples_Y.flatten())): # if all labels are 1
@@ -220,11 +220,44 @@ def grow_rand_tree(examples_X, examples_Y, m, depth = 0):
 			return DecisionTree(attribute, split, lambda x: x, grow_rand_tree(Set0X, Set0Y, m, depth + 1), grow_rand_tree(Set1X, Set1Y, m, depth + 1))
 		else:
 			P = sum(examples_Y.flatten())/len(examples_Y.flatten())
-			print "Can't perform any more splits; P = ", P
 			if P > .5:
 				return leaf(1)
 			else:
 				return leaf(0)
+
+def grow_pruned_tree(examples_X, examples_Y, D, depth = 0):
+	"""
+	grows a tree up to depth D
+	for use in boosting
+	"""
+	print "DEPTH = %u" % depth
+
+	if(sum(examples_Y.flatten()) == 0): # if all labels are 0
+		#print "I AM A LEAF :DDD"
+		return leaf(0)
+	elif(sum(examples_Y.flatten()) == len(examples_Y.flatten())): # if all labels are 1
+		#print "I AM A 1 LEAF"
+		return leaf(1)
+	elif depth == D:
+		P = sum(examples_Y.flatten())/len(examples_Y.flatten())
+		if P > .5:
+			return leaf(1)
+		else:
+			return leaf(0)
+	else:
+		sa = split_attribute(examples_X, examples_Y);
+		attribute = sa[0]
+		split = sa[1]
+		if(attribute != -1 and split != -1):
+			indices = binarize(examples_X, attribute, split)
+			Set1X = examples_X[indices]
+			Set1Y = examples_Y[indices]
+			indices = np.invert(indices)
+			Set0X  = examples_X[indices]
+			Set0Y  = examples_Y[indices]
+
+			return DecisionTree(attribute, split, lambda x: x, grow_tree(Set0X, Set0Y, depth + 1), grow_tree(Set1X, Set1Y, depth + 1))
+
 
 class RandomForest:
 
