@@ -127,6 +127,9 @@ def train_boosted(data, labels, T, m, max_depth = 2):
 	return a, h
 
 def predict_boosted(a, h, data, labels):
+	"""
+	predict using alpha and h from adaboost training
+	"""
 	prediction = np.zeros(data.shape[0])
 	for i in range(0,data.shape[0]):
 		x = data[i, :]
