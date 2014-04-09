@@ -2,6 +2,7 @@ import scipy
 import scipy.io as sio
 import numpy as np
 import code
+import signal
 from decisions import *
 import random as rand
 from multiprocessing import Pool
@@ -37,6 +38,9 @@ def _train_rand_tree(arg):
 	tree = grow_rand_tree(data[subset], labels[subset], m)
 	return tree
 
+def init_worker():
+	signal.signal(signal.SIGINT, signal.SIG_IGN)
+
 def train_rand_forest(data, labels, T, N ,m ):
 	"""
 	Train random forest
@@ -44,9 +48,13 @@ def train_rand_forest(data, labels, T, N ,m ):
 	N: number of samples per tree
 	m: number of attributes sampled per node
 	"""
-	pool = Pool()
+	pool = Pool(None, init_worker)
 	iterable = [(data, labels, N, m) for i in xrange(T)]
-	trees = pool.map(_train_rand_tree, iterable)
+	try:
+		trees = pool.map(_train_rand_tree, iterable)
+	except KeyboardInterrupt:
+		pool.terminate()
+		sys.exit(1)
 	pool.close()
 	return RandomForest(trees)
 
@@ -145,4 +153,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+	main()
