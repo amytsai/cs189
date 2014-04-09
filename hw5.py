@@ -108,7 +108,7 @@ def train_boosted(data, labels, T, m, max_depth = 2):
 		#calculate a_t
 		error = 0
 		for i in range(N):
-			if weak_learn.choose(data_t[i]) != labels_t[i]:
+			if weak_learn.choose(data[i]) != labels[i]:
 				error += 1
 		error_rate = float(error) / float(N)
 		assert error_rate != 0
@@ -118,7 +118,7 @@ def train_boosted(data, labels, T, m, max_depth = 2):
 		#update
 		if(t != T-1):
 			for i in range(0, N):
-				if labels_t[i] == weak_learn.choose(data_t[i]):
+				if labels_t[i] == weak_learn.choose(data[i]):
 					D[t+1, i] = exp(-a[t])
 				else:
 					D[t+1, i] = exp(a[t])
