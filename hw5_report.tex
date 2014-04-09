@@ -8,7 +8,7 @@
 
 \title{CS 189 Report for Homework \Homework}
 \author{\Name}
-\markboth{CS189 Homework \Homework\ \Name}{CS1189\Session\ Homework \Homework\ \Name}
+\markboth{CS189 Homework \Homework\ \Name}{CS 189 \Session\ Homework \Homework\ \Name}
 \pagestyle{myheadings}
 
 \begin{document}
@@ -20,19 +20,19 @@ In this project, we implemented Decision Trees, Random Forests, and Adaboosted D
 
 \section{What we implemented}
 
-In addition to the items we were required to implement, we also implemented \textbf{cross-validation}, as well as \textbf{multithreaded generation of Random Forests}. 
+In addition to the items we were required to implement, we also implemented \textbf{cross-validation}, as well as \textbf{multiprocessing generation of Random Forests}. 
 
 \subsection{Cross-Validation}
 We implemented generic functions to perform cross-validation on any learning algorithm, and several of the algorithms that we implemented here can be passed in, enabling us to cross-validate all of our algorithms with ease. 
 
-\subsection{Multithreading}
-Multithreading the generation of forests helped increase our speed approximately linearly with the number of physical cores in the computer. Multithreading was performed using the Python 2.7 \texttt{multiprocessing} module. 
+\subsection{Multiprocessing}
+Multiprocessing the generation of forests helped increase our speed approximately linearly with the number of physical cores in the computer. Multiprocessing was performed using the Python 2.7 \texttt{multiprocessing} module. 
 
 \section{Results}
 
 We tested our results by performing cross-validation. \\
 
-We obtained results of varying degrees. Our best result for a single Decision Tree was about 7.5\% error rate. Since Random Forests were the most promising of the three algorithms, we more extensively tested those. Here are some test results from Random Forests:
+We obtained results of varying degrees. Our best result for a single Decision Tree was about 7.5\% error rate. Our best result for Adaboosted decision trees was about 6.8\%. Since Random Forests were the most promising of the three algorithms, we more extensively tested those. Here are some test results from Random Forests: \\
 
 \begin{tabular}{|c|c|c||c|}
 \hline
@@ -52,7 +52,9 @@ Number of Trees & Samples Per Tree & Attributes Per Node & Error Rate (\%)\\
 31 & 1100 & 17 & 5.67 \\
 51 & 1100 & 15 & 5.47 \\
 \hline
-
 \end{tabular}
+\vspace{11pt}
+\\
+We found that the last configuration was best and therefore used it in our Kaggle submission. It takes about 90 seconds to generate this forest on a 4th generation Intel i5 dual-core 2.4 GHz processor on OS X. 
 
 \end{document}
