@@ -34,8 +34,10 @@ def _train_rand_tree(arg):
 	labels = arg[1]
 	N = arg[2]
 	m = arg[3]
+	i = arg[4]
 	subset = sample(range(0, data.shape[0]), N)
 	tree = grow_rand_tree(data[subset], labels[subset], m)
+	print "generated tree #%u" % i
 	return tree
 
 def init_worker():
@@ -49,7 +51,7 @@ def train_rand_forest(data, labels, T, N ,m ):
 	m: number of attributes sampled per node
 	"""
 	pool = Pool(None, init_worker)
-	iterable = [(data, labels, N, m) for i in xrange(T)]
+	iterable = [(data, labels, N, m, i) for i in xrange(T)]
 	try:
 		trees = pool.map(_train_rand_tree, iterable)
 	except KeyboardInterrupt:
@@ -126,7 +128,9 @@ def main():
 	# train = lambda x, y: train_rand_forest(x, y, 21, 600, 20)
 	# 6.1% 
 	# train = lambda x, y: train_rand_forest(x, y, 21, 900, 20)
-	train = lambda x, y: train_rand_forest(x, y, 21, 900, 20)
+	# 5.8%
+	# train = lambda x, y: train_rand_forest(x, y, 21, 1100, 20)
+	train = lambda x, y: train_rand_forest(x, y, 21, 1500, 20)
 	predict = lambda x, tree: tree.choose(x)
 	cross_validate(10, xtrain, ytrain, train, predict)
 
@@ -164,7 +168,6 @@ def main():
 	print "Total average error rate: " + str(sum(errors) / len(errors))
 	"""
 
-	code.interact(local = locals())
 
 
 

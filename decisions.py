@@ -195,7 +195,7 @@ def grow_rand_tree(examples_X, examples_Y, m, depth = 0):
 	grows a tree where m random attributes are chosen from classificatoin at each level
 	"""
 
-	print "DEPTH = %u" % depth
+	# print "DEPTH = %u" % depth
 	if(sum(examples_Y.flatten()) == 0): # if all labels are 0
 		return leaf(0)
 	elif(sum(examples_Y.flatten()) == len(examples_Y.flatten())): # if all labels are 1
@@ -219,7 +219,7 @@ def grow_rand_tree(examples_X, examples_Y, m, depth = 0):
 			return DecisionTree(attribute, split, identity, grow_rand_tree(Set0X, Set0Y, m, depth + 1), grow_rand_tree(Set1X, Set1Y, m, depth + 1))
 		else:
 			P = sum(examples_Y.flatten())/len(examples_Y.flatten())
-			print "Can't perform any more splits; P = ", P
+			# print "Can't perform any more splits; P = ", P
 			if P > .5:
 				return leaf(1)
 			else:
