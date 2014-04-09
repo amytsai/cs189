@@ -32,10 +32,13 @@ def sample(*args):
 def _train_rand_tree(arg):
 	data = arg[0]
 	labels = arg[1]
-	N = arg[2]
-	m = arg[3]
+	T = arg[2]
+	N = arg[3]
+	m = arg[4]
+	i = arg[5]
 	subset = sample(range(0, data.shape[0]), N)
 	tree = grow_rand_tree(data[subset], labels[subset], m)
+	print "Finished generating tree " + str(i + 1) + " of " + str(T)
 	return tree
 
 def init_worker():
@@ -49,7 +52,7 @@ def train_rand_forest(data, labels, T, N ,m ):
 	m: number of attributes sampled per node
 	"""
 	pool = Pool(None, init_worker)
-	iterable = [(data, labels, N, m) for i in xrange(T)]
+	iterable = [(data, labels, T, N, m, i) for i in xrange(T)]
 	try:
 		trees = pool.map(_train_rand_tree, iterable)
 	except KeyboardInterrupt:
@@ -104,61 +107,21 @@ def generate_predictions(xtrain, ytrain, xtest):
 	return predictions
 
 def main():
-	"""
-	just some testing stuff for now
-	"""
 
 	spam = sio.loadmat("spam.mat")
 	xtest = spam['Xtest']
 	xtrain = spam['Xtrain']
 	ytrain = spam['ytrain']
 
-	# train = lambda x, y: train_rand_forest(x, y, 10, 400, 15)
-	# predict = lambda x, tree: tree.choose(x)
-	# cross_validate(4, xtrain, ytrain, train, predict)
-
 	# generate predictions and win
+	print "Starting Random Forest generation..."
 	predictions = generate_predictions(xtrain, ytrain, xtest)
+	print "Forest generation complete, writing to file..."
 	with open('hw5.csv', 'w') as f:
 		f.write('Id,Category\n')
 		for index, item in enumerate(predictions):
 			f.write(str(index + 1) + ',' + str(item) + '\n')
-
-	"""
-	OLD STUFF
-	DT = train(xtrain, ytrain)
-	error = predict(xtrain,ytrain, DT)
-	print "training error rate = ",  error/ float(xtrain.shape[0])
-
-	print "Beginning %u-fold cross-validation..." % KFOLD
-	random_classes = np.random.random_integers(0, KFOLD - 1, len(xtrain))
-	cross_trees = []
-	errors = []
-	for i in xrange(KFOLD):
-		print "Cross-validation iteration %u" % i
-		train_indices = (random_classes != i).nonzero()
-		test_indices = (random_classes == i).nonzero() # apparently boolean advanced indexing is faster than this, but meh :(
-		train_x = xtrain[train_indices]
-		train_y = ytrain[train_indices]
-		test_x = xtrain[test_indices]
-		test_y = ytrain[test_indices]
-		print "Growing tree..."
-		tree = train(train_x, train_y)
-		print "Tree grown. "
-		error = 0
-		for i in xrange(len(test_x)):
-			if tree.choose(test_x[i]) != test_y[i]:
-				error += 1
-		error_rate = float(error) / float(len(test_x))
-
-		print "Error rate: " + str(error_rate)
-		errors.append(error_rate)
-		cross_trees.append(tree)
-
-	print "Total average error rate: " + str(sum(errors) / len(errors))
-	"""
-
-
+	print "File written, see hw5.csv. "
 
 
 if __name__ == "__main__":
