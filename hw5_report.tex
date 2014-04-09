@@ -1,0 +1,58 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,textcomp,amssymb,geometry,graphicx}
+
+\def\Name{Amy Tsai, Allen Li}  % Your name
+\def\Homework{5}%Number of Homework, PUT SOMETHING HERE
+\def\Session{Spring 2014}
+
+
+\title{CS 189 Report for Homework \Homework}
+\author{\Name}
+\markboth{CS189 Homework \Homework\ \Name}{CS1189\Session\ Homework \Homework\ \Name}
+\pagestyle{myheadings}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+In this project, we implemented Decision Trees, Random Forests, and Adaboosted Decision Trees. We didn't use any external sources other than the papers provided with the homework instructions. 
+
+\section{What we implemented}
+
+In addition to the items we were required to implement, we also implemented \textbf{cross-validation}, as well as \textbf{multithreaded generation of Random Forests}. 
+
+\subsection{Cross-Validation}
+We implemented generic functions to perform cross-validation on any learning algorithm, and several of the algorithms that we implemented here can be passed in, enabling us to cross-validate all of our algorithms with ease. 
+
+\subsection{Multithreading}
+Multithreading the generation of forests helped increase our speed approximately linearly with the number of physical cores in the computer. Multithreading was performed using the Python 2.7 \texttt{multiprocessing} module. 
+
+\section{Results}
+
+We tested our results by performing cross-validation. \\
+
+We obtained results of varying degrees. Our best result for a single Decision Tree was about 7.5\% error rate. Since Random Forests were the most promising of the three algorithms, we more extensively tested those. Here are some test results from Random Forests:
+
+\begin{tabular}{|c|c|c||c|}
+\hline
+Number of Trees & Samples Per Tree & Attributes Per Node & Error Rate (\%)\\
+15 & 500 & 25 & 7.2 \\
+15 & 500 & 25 & 6.3 \\
+15 & 600 & 20 & 6.1 \\
+15 & 400 & 20 & 7.5 \\
+21 & 800 & 20 & 6.2 \\
+21 & 400 & 20 & 6.9 \\
+21 & 600 & 20 & 6.5 \\
+21 & 900 & 20 & 6.1 \\
+21 & 1100 & 20 & 5.8 \\
+21 & 1500 & 20 & 5.82 \\
+21 & 1100 & 15 & 5.6 \\
+31 & 1100 & 15 & 5.4 \\
+31 & 1100 & 17 & 5.67 \\
+51 & 1100 & 15 & 5.47 \\
+\hline
+
+\end{tabular}
+
+\end{document}
