@@ -5,9 +5,11 @@ import code
 import signal
 from decisions import *
 import random as rand
+import csv
 from multiprocessing import Pool
+from math import *
 
-#KFOLD = 4
+KFOLD = 4
 
 def train(data, labels):
 	"""train a regular decision tree"""
@@ -70,8 +72,79 @@ def predict_rand_forest(data, labels, forest):
 		if(prediction != labels[ex, 0]):
 			error += 1
 	error_rate = error/ float(data.shape[0])
-	print "test error rate = ", error_rate
+	#print "test error rate = ", error_rate
 	return predictions
+
+def train_boosted(data, labels, T, m, max_depth = 2):
+	"""
+	adaboost
+	using the same algorithm as "IntroToBoosting.pdf"
+	"""
+	h = []
+	a = np.zeros(T)
+	N = data.shape[0]
+	D = np.zeros([T,N])
+	D[0, :]= np.tile(1/float(N), N)
+	for t in range(0, T):
+		#resample data
+		print "iteration: " , t
+		sums  = np.zeros(N)
+		sums[0]= 0
+		#cumulative sums
+		for i in range(1, N):
+		 	sums[i] = D[t,i-1] + sums[i-1]
+		data_t = np.zeros(data.shape)
+		labels_t = np.zeros(labels.shape)
+		for n in range(0, N):
+			i = rand.random()
+			sample_index = np.argmax(sums > i)
+			data_t[n] = data[sample_index]
+			labels_t[n] = labels[sample_index]
+
+		#train weak learner
+		weak_learn = grow_pruned_tree(data_t, labels_t, max_depth, m)
+		h.append(weak_learn)
+
+		#calculate a_t
+		error = 0
+		for i in range(N):
+			if weak_learn.choose(data_t[i]) != labels_t[i]:
+				error += 1
+		error_rate = float(error) / float(N)
+		assert error_rate != 0
+		print "error_rate = ", error_rate
+		a[t] = .5 * log((1-error_rate)/error_rate)
+
+		#update
+		if(t != T-1):
+			for i in range(0, N):
+				if labels_t[i] == weak_learn.choose(data_t[i]):
+					D[t+1, i] = exp(-a[t])
+				else:
+					D[t+1, i] = exp(a[t])
+			D[t+1, :] = D[t+1, :]/float(np.sum(D[t+1, :]))
+
+	return a, h
+
+def predict_boosted(a, h, data, labels):
+	prediction = np.zeros(data.shape[0])
+	for i in range(0,data.shape[0]):
+		x = data[i, :]
+		H = 0
+		for t in range(len(a)):
+			y = h[t].choose(x)
+			if y == 0:
+				y = -1
+			H += y * a[t]
+		prediction[i] = np.sign(H)
+	prediction = prediction == 1 #convert -1's to 0
+	error = 0
+	for i in range(0, data.shape[0]):
+		if prediction[i] != labels[i]:
+			error += 1
+	error_rate = error/float(data.shape[0])
+	print "error rate = ", error_rate
+	return prediction
 
 def cross_validate(k, data, labels, train_fn = train, predict_fn = predict):
 	print "Beginning %u-fold cross-validation..." % k
@@ -123,6 +196,22 @@ def main():
 			f.write(str(index + 1) + ',' + str(item) + '\n')
 	print "File written, see hw5.csv. "
 
-
 if __name__ == "__main__":
 	main()
+
+import sys
+
+def info(type, value, tb):
+	if hasattr(sys, 'ps1') or not sys.stderr.isatty() or type != AssertionError:
+			# we are in interactive mode or we don't have a tty-like
+			# device, so we call the default hook
+			sys.__excepthook__(type, value, tb)
+	else:
+			import traceback, pdb
+			# we are NOT in interactive mode, print the exception...
+			traceback.print_exception(type, value, tb)
+			print
+			# ...then start the debugger in post-mortem mode.
+			pdb.pm()
+
+sys.excepthook = info
