@@ -98,6 +98,11 @@ def cross_validate(k, data, labels, train_fn = train, predict_fn = predict):
 	print "Total average error rate: " + str(sum(errors) / len(errors))
 	return errors, cross_trees
 
+def generate_predictions(xtrain, ytrain, xtest):
+	forest = train_rand_forest(xtrain, ytrain, 51, 1100, 15)
+	predictions = np.array(map(forest.choose, xtest))
+	return predictions
+
 def main():
 	"""
 	just some testing stuff for now
@@ -108,11 +113,16 @@ def main():
 	xtrain = spam['Xtrain']
 	ytrain = spam['ytrain']
 
-	# forest = train_rand_forest(xtrain, ytrain, 10, 400, 15)
-	# predict_rand_forest(xtrain, ytrain, forest)
-	train = lambda x, y: train_rand_forest(x, y, 10, 400, 15)
-	predict = lambda x, tree: tree.choose(x)
-	cross_validate(4, xtrain, ytrain, train, predict)
+	# train = lambda x, y: train_rand_forest(x, y, 10, 400, 15)
+	# predict = lambda x, tree: tree.choose(x)
+	# cross_validate(4, xtrain, ytrain, train, predict)
+
+	# generate predictions and win
+	predictions = generate_predictions(xtrain, ytrain, xtest)
+	with open('hw5.csv', 'w') as f:
+		f.write('Id,Category\n')
+		for index, item in enumerate(predictions):
+			f.write(str(index + 1) + ',' + str(item) + '\n')
 
 	"""
 	OLD STUFF
