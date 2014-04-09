@@ -2,13 +2,17 @@ import scipy
 import scipy.io as sio
 import numpy as np
 import code
+import signal
 from decisions import *
 import random as rand
+<<<<<<< HEAD
 import csv
+=======
+from multiprocessing import Pool
+>>>>>>> bc96971a7aa7a52c48a2430c7976d6d535f44af4
 
 KFOLD = 4
 
-leaf = DecisionTree.leaf # for convenience
 def train(data, labels):
 	"""train a regular decision tree"""
 	return grow_tree(data,labels)
@@ -26,6 +30,21 @@ def predict(data, labels, DT):
 	print "test error rate = ", error_rate
 	return predictions
 
+def sample(*args):
+	return rand.sample(*args)
+
+def _train_rand_tree(arg):
+	data = arg[0]
+	labels = arg[1]
+	N = arg[2]
+	m = arg[3]
+	subset = sample(range(0, data.shape[0]), N)
+	tree = grow_rand_tree(data[subset], labels[subset], m)
+	return tree
+
+def init_worker():
+	signal.signal(signal.SIGINT, signal.SIG_IGN)
+
 def train_rand_forest(data, labels, T, N ,m ):
 	"""
 	Train random forest
@@ -33,12 +52,14 @@ def train_rand_forest(data, labels, T, N ,m ):
 	N: number of samples per tree
 	m: number of attributes sampled per node
 	"""
-	trees = []
-	for t in range(0, T):
-		#print "Training tree: ", t
-		subset = rand.sample(range(0, data.shape[0]), N)
-		tree = grow_rand_tree(data[subset], labels[subset], m)
-		trees.append(tree)
+	pool = Pool(None, init_worker)
+	iterable = [(data, labels, N, m) for i in xrange(T)]
+	try:
+		trees = pool.map(_train_rand_tree, iterable)
+	except KeyboardInterrupt:
+		pool.terminate()
+		sys.exit(1)
+	pool.close()
 	return RandomForest(trees)
 
 def predict_rand_forest(data, labels, forest):
@@ -74,12 +95,17 @@ def cross_validate(k, data, labels, train_fn = train, predict_fn = predict):
 		print "Growing tree..."
 		tree = train_fn(train_x, train_y)
 		print "Tree grown. "
-		error_rate = predict_fn(test_x, test_y, tree)
+		error = 0
+		for i in xrange(len(test_x)):
+			if predict_fn(test_x[i], tree) != test_y[i]:
+				error += 1
+		error_rate = float(error) / float(len(test_x))
 		print "Error rate: " + str(error_rate)
 		errors.append(error_rate)
 		cross_trees.append(tree)
 
 	print "Total average error rate: " + str(sum(errors) / len(errors))
+	return errors, cross_trees
 
 def main():
 	"""
@@ -94,10 +120,11 @@ def main():
 	N = 800
 	m = 15
 
-	forest = train_rand_forest(xtrain, ytrain, T, N, m)
-	predictions = predict_rand_forest(xtest, ytrain[:xtest.shape[0]], forest) #dummy labels
-	for p in predictions:
-		print p
+	# forest = train_rand_forest(xtrain, ytrain, 10, 400, 15)
+	# predict_rand_forest(xtrain, ytrain, forest)
+	train = lambda x, y: train_rand_forest(x, y, 10, 400, 15)
+	predict = lambda x, tree: tree.choose(x)
+	cross_validate(4, xtrain, ytrain, train, predict)
 
 	#predict_rand_forest(xtrain, ytrain, forest)
 	#cross_validate(4, xtrain, ytrain)
@@ -136,4 +163,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+	main()
