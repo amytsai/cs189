@@ -158,7 +158,6 @@ def main():
 	print "Total average error rate: " + str(sum(errors) / len(errors))
 	"""
 
-	code.interact(local = locals())
 
 
 

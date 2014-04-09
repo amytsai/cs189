@@ -1,0 +1,5 @@
+Make sure you have the Scipy stack and Python 2.7 installed, then run:
+
+python hw5.py
+
+from this directory. Predicted output in Kaggle format will appear in hw5.csv. Note that this output is non-deterministic, and will probably be different from what was submitted. 
