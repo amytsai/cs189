@@ -74,10 +74,18 @@ def predict_rand_forest(data, labels, forest):
 	#print "test error rate = ", error_rate
 	return predictions
 
-def train_boosted(data, labels, its):
+def train_boosted(data, labels, T, max_depth = 3):
 	"""
 	adaboost
 	"""
+	h = np.zeros(T)
+	n = data.shape[0]
+	Dt = np.tile(1/n, n)
+	for t in range(0, T):
+		weak_learn = grow_pruned_tree(data, labels, max_depth)
+		#choose at
+		#update
+
 
 def cross_validate(k, data, labels, train_fn = train, predict_fn = predict):
 	print "Beginning %u-fold cross-validation..." % k
