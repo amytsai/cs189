@@ -8,6 +8,7 @@ from math import *
 def train_single_layer(images, labels, epochs):
   """
   train a single layer neural network
+  (mean square error)
   """
   alpha = .07
   images_t = images.transpose()
@@ -18,8 +19,10 @@ def train_single_layer(images, labels, epochs):
     t_k[labels[i]] = 1
     t[i] = t_k
   t = t.transpose()
-  #initialize weights
+  #initialize weights to be +- ~10^-3
   W = np.random.rand(784, 10) * .002
+  bias = np.random.rand(1,10) * .002
+  bias = bias - .001
   W = W - .001
 
   for e in range(0, epochs):
@@ -30,22 +33,25 @@ def train_single_layer(images, labels, epochs):
     images_batch = images[:, sample]
     W_t = W.transpose()
     #forward pass
-    S = np.dot(W_t, images_batch)
+    S = np.add(np.dot(W_t, images_batch),bias.transpose())
     g_S = 1 / (1 + np.exp(-S))
     output = g_S > .5
 
     #calculate error every 10 epochs
     if e % 10 == 0:
-      temp = np.power(output - t_batch,  2)
+      temp = np.add(np.dot(W_t, images), bias.transpose())
+      temp = 1/ (1 + np.exp(-temp))
+      temp = temp > .5
+      temp = np.power(temp - t,  2)
       error = .1 * temp.sum()
+      error = error/ 60000
       print 'error at epoch ', e, 'is: ', error
-      print 'min g_S', g_S.min()
-      print 'max g_S', g_S.max()
 
     #backwards pass
-    delta = (t_batch - g_S) * g_S * (1 - g_S)
+    delta = (g_S - t_batch) * (1 - g_S)
     a = alpha / pow(e + 1, .5)
     W = W - a * np.dot(images_batch, delta.transpose())
+    bias = bias - a * delta.sum(1)
 
   return W
 
@@ -68,7 +74,7 @@ def main():
   labels = labels[0][0]
   labels = labels.flatten()
 
-  output = train_single_layer(images,labels,10)
+  output = train_single_layer(images,labels,500)
   code.interact(local = locals())
 
 
