@@ -55,6 +55,18 @@ def train_single_layer(images, labels, epochs):
 
   return W, bias
 
+def predict_single_layer(images, labels, W, bias):
+  #forward pass
+  S = np.add(np.dot(W.transpose(), images), bias.transpose())
+  g_S = 1 / (1 + np.exp(-S))
+  output = np.argmax(g_S, 0)
+
+  error_rate = np.not_equal(output, labels)
+  error_rate = error_rate.sum()
+  error_rate = error_rate / 10000.0
+  print "TEST ERROR: ", error_rate
+  return g_S, output
+
 def main():
   """
   load data
@@ -63,7 +75,6 @@ def main():
   training = training['train']
   images = training['images']
   labels = training['labels']
-
   images = images[0][0]
   images = images.reshape(28*28, 60000)
   for col in range(0, images.shape[1]):
@@ -74,7 +85,23 @@ def main():
   labels = labels[0][0]
   labels = labels.flatten()
 
-  output = train_single_layer(images,labels,500)
+  test = sio.loadmat('test.mat')
+  test = test['test']
+  test_images = test['images']
+  test_labels = test['labels']
+  test_images = test_images[0][0]
+  test_images = test_images.reshape(28*28, 10000)
+  for col in range(0, test_images.shape[1]):
+    column = test_images[:, col]
+    column = column - np.average(column)
+    column = column / np.std(column)
+    test_images[:, col] = column
+  test_labels = test_labels[0][0]
+  test_labels = test_labels.flatten()
+
+  W, bias = train_single_layer(images,labels,1000)
+  g_S, output = predict_single_layer(test_images, test_labels, W, bias)
+
   code.interact(local = locals())
 
 
