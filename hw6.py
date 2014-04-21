@@ -20,10 +20,10 @@ def train_single_layer(images, labels, epochs):
     t[i] = t_k
   t = t.transpose()
   #initialize weights to be +- ~10^-3
-  W = np.random.rand(784, 10) * .002
+  W = np.random.rand(784, 10) * .00002
   bias = np.random.rand(1,10) * .002
   bias = bias - .001
-  W = W - .001
+  W = W - .00001
 
   for e in range(0, epochs):
     sample = np.arange(60000)
@@ -49,11 +49,11 @@ def train_single_layer(images, labels, epochs):
 
     #backwards pass
     delta = (g_S - t_batch) * (1 - g_S)
-    a = alpha / pow(e + 1, .5)
+    a = alpha / pow(e + 1, .3)
     W = W - a * np.dot(images_batch, delta.transpose())
     bias = bias - a * delta.sum(1)
 
-  return W
+  return W, bias
 
 def main():
   """
