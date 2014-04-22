@@ -270,8 +270,6 @@ def train_multilayer_ms(images, labels, t_images, t_labels, epochs):
     S3 = np.add(np.dot(W3_t, out2), bias3.transpose())
     out3 = 1.0 / (1.0 + np.exp(-S3))
 
-    #assert False
-
     #backwards pass
     a = alpha / pow(e + 1, .3)
     delta3 = (out3 - t_batch) * out3 * (1.0 - out3)
@@ -284,16 +282,6 @@ def train_multilayer_ms(images, labels, t_images, t_labels, epochs):
     bias1 = bias1 - a * delta1.sum(1)
     bias2 = bias2 - a * delta2.sum(1)
     bias3 = bias3 - a * delta3.sum(1)
-
-    #finite differences
-    '''
-    epsilon = .00001
-    out1 = predict_multilayer_me(images_batch, W1 + epsilon, W2, W3, bias1, bias2, bias3)
-    out2 = predict_multilayer_me(images_batch, W1 - epsilon, W2, W3, bias1, bias2, bias3)
-    E1 = np.power(t_batch - out1, 2).sum()
-    E2 = np.power(t_batch - out2, 2).sum()
-    fd_delta1 = (E1 - E2)/ 2* epsilon
-    '''
 
     #calculate error every 10 epochs
     if e % 10 == 0:
@@ -350,7 +338,7 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
   test_errors = []
   eps = []
 
-  alpha = .03
+  alpha = .015
   images_t = images.transpose()
 
   #convert labels to 10 dimensional vector
@@ -362,12 +350,12 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
   t = t.transpose()
 
   #initialize weights and biases
-  W1 = np.random.rand(784, 300) * .002 - .001
-  W2 = np.random.rand(300, 100) * .002 - .001
-  W3 = np.random.rand(100, 10) * .002 - .001
-  bias1 = np.random.rand(1,300) * .0002 - .0001
-  bias2 = np.random.rand(1, 100) * .0002 - .0001
-  bias3 = np.random.rand(1, 10) * .0002 - .0001
+  W1 = np.random.rand(784, 300) * 2 - 1
+  W2 = np.random.rand(300, 100) * 2 - 1
+  W3 = np.random.rand(100, 10) * 2 - 1
+  bias1 = np.random.rand(1,300)  
+  bias2 = np.random.rand(1, 100) 
+  bias3 = np.random.rand(1, 10)  
 
   for e in range(0, epochs):
     # take a mini batch
@@ -391,8 +379,8 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
     out3 = 1.0 / (1.0 + np.exp(-S3))
 
     #backwards pass
-    a = alpha / pow(e + 1, .3)
-    delta3 = (out3 - t_batch)
+    a = alpha / pow(e + 1, .5)
+    delta3 = out3 - t_batch
     W3 = W3 - a * np.dot(out2, delta3.transpose())
     delta2 = out2_p * np.dot(W3, delta3)
     W2 = W2 - a * np.dot(out1, delta2.transpose())
@@ -403,16 +391,6 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
     bias2 = bias2 - a * delta2.sum(1)
     bias3 = bias3 - a * delta3.sum(1)
 
-    #finite differences
-    '''
-    epsilon = .00001
-    out1 = predict_multilayer_me(images_batch, W1 + epsilon, W2, W3, bias1, bias2, bias3)
-    out2 = predict_multilayer_me(images_batch, W1 - epsilon, W2, W3, bias1, bias2, bias3)
-    E1 = np.power(t_batch - out1, 2).sum()
-    E2 = np.power(t_batch - out2, 2).sum()
-    fd_delta1 = (E1 - E2)/ 2* epsilon
-    '''
-
     #calculate error every 10 epochs
     if e % 10 == 0:
       #training error
@@ -421,7 +399,7 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
       error = np.not_equal(y, labels)
       error = error.sum() / 60000.0
       loss = t * np.log(output + .00000000000001) + (1.0-t) * np.log(1.0 - output + .00000000000001) # log + small value
-      loss = .1 * error.sum()
+      loss = .1 * loss.sum()
       loss = loss/ 60000.0
       train_errors.append(error)
       train_loss.append(loss)
@@ -481,7 +459,7 @@ def main():
   test_labels = test_labels[0][0]
   test_labels = test_labels.flatten()
 
-  W1, W2, W3, bias1, bias2, bias3 = train_multilayer_ce(images,labels, test_images, test_labels, 100)
+  W1, W2, W3, bias1, bias2, bias3 = train_multilayer_ce(images,labels, test_images, test_labels, 1000)
   #g_S, output = predict_single_layer(test_images, test_labels, W, bias)
 
   code.interact(local = locals())
