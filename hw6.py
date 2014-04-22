@@ -205,6 +205,7 @@ def predict_single_layer(images, labels, W, bias):
 
 def train_multilayer_ms(images, labels, t_images, t_labels, epochs):
   #preprocessing specific to mean square
+  images = images / 255.0
   means = np.average(images, 1).reshape(784, 1)
   images = np.subtract(images, means)
   stds = np.std(images, 1)
@@ -214,6 +215,7 @@ def train_multilayer_ms(images, labels, t_images, t_labels, epochs):
       column = column / stds[col]
     images[col, :] = column
 
+  t_images = t_images / 255.0
   means = np.average(t_images, 1).reshape(784, 1)
   stds = np.std(t_images, 1)
   for col in range(0, t_images.shape[0]):
@@ -228,7 +230,7 @@ def train_multilayer_ms(images, labels, t_images, t_labels, epochs):
   test_errors = []
   eps = []
 
-  alpha = .05
+  alpha = .007
   images_t = images.transpose()
 
   #convert labels to 10 dimensional vector
@@ -273,9 +275,9 @@ def train_multilayer_ms(images, labels, t_images, t_labels, epochs):
     #backwards pass
     a = alpha / pow(e + 1, .3)
     delta3 = (out3 - t_batch) * out3 * (1.0 - out3)
-    W3 = W3 - a * np.dot(S2, delta3.transpose())
+    W3 = W3 - a * np.dot(out2, delta3.transpose())
     delta2 = out2_p * np.dot(W3, delta3)
-    W2 = W2 - a * np.dot(S1, delta2.transpose())
+    W2 = W2 - a * np.dot(out1, delta2.transpose())
     delta1 = out1_p * np.dot(W2, delta2)
     W1 = W1 - a * np.dot(images_batch, delta1.transpose())
 
@@ -323,9 +325,7 @@ def train_multilayer_ms(images, labels, t_images, t_labels, epochs):
   return W, bias
 
 def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
-  print 'max images: ', images.max()
-  images = images / 255.0
-  print 'max images: ', images.max()
+  #images = images / 255.0
   means = np.average(images, 1).reshape(784, 1)
   images = np.subtract(images, means)
   stds = np.std(images, 1)
@@ -335,7 +335,7 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
       column = column / stds[col]
     images[col, :] = column
 
-  t_images = t_images/ 255.0
+  #t_images = t_images/ 255.0
   means = np.average(t_images, 1).reshape(784, 1)
   stds = np.std(t_images, 1)
   for col in range(0, t_images.shape[0]):
@@ -350,7 +350,7 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
   test_errors = []
   eps = []
 
-  alpha = .005
+  alpha = .03
   images_t = images.transpose()
 
   #convert labels to 10 dimensional vector
@@ -362,12 +362,12 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
   t = t.transpose()
 
   #initialize weights and biases
-  W1 = np.random.rand(784, 300) * .00002 - .00001
-  W2 = np.random.rand(300, 100) * .00002 - .00001
-  W3 = np.random.rand(100, 10) * .00002 - .00001
-  bias1 = np.random.rand(1,300) * .2 - .1
-  bias2 = np.random.rand(1, 100) * .2 - .1
-  bias3 = np.random.rand(1, 10) * .2 - .1
+  W1 = np.random.rand(784, 300) * .002 - .001
+  W2 = np.random.rand(300, 100) * .002 - .001
+  W3 = np.random.rand(100, 10) * .002 - .001
+  bias1 = np.random.rand(1,300) * .0002 - .0001
+  bias2 = np.random.rand(1, 100) * .0002 - .0001
+  bias3 = np.random.rand(1, 10) * .0002 - .0001
 
   for e in range(0, epochs):
     # take a mini batch
@@ -383,21 +383,19 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
     W3_t = W3.transpose()
     S1 = np.add(np.dot(W1_t, images_batch),bias1.transpose()) #S1 300 x 200
     out1 = np.tanh(S1)
-    out1_p = 1 - np.power(np.tanh(S1), 2)
+    out1_p = 1.0 - np.power(out1, 2)
     S2 = np.add(np.dot(W2_t, out1), bias2.transpose()) #S2 200 x 100
     out2 = np.tanh(S2)
-    out2_p = 1 - np.power(np.tanh(S2), 2)
+    out2_p = 1.0 - np.power(out2, 2)
     S3 = np.add(np.dot(W3_t, out2), bias3.transpose())
     out3 = 1.0 / (1.0 + np.exp(-S3))
 
-    #assert False
-
     #backwards pass
-    a = alpha / pow(e + 1, .5)
+    a = alpha / pow(e + 1, .3)
     delta3 = (out3 - t_batch)
-    W3 = W3 - a * np.dot(S2, delta3.transpose())
+    W3 = W3 - a * np.dot(out2, delta3.transpose())
     delta2 = out2_p * np.dot(W3, delta3)
-    W2 = W2 - a * np.dot(S1, delta2.transpose())
+    W2 = W2 - a * np.dot(out1, delta2.transpose())
     delta1 = out1_p * np.dot(W2, delta2)
     W1 = W1 - a * np.dot(images_batch, delta1.transpose())
 
@@ -442,7 +440,7 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
 
   plt.plot(eps, train_errors, 'g', eps, train_loss, 'r', eps, test_errors, 'b')
   plt.show()
-  return W, bias
+  return W1, W2, W3, bias1, bias2, bias3
 
 def predict_multilayer_me(images, W1, W2, W3, b1, b2, b3):
   W1_t = W1.transpose()
@@ -483,8 +481,8 @@ def main():
   test_labels = test_labels[0][0]
   test_labels = test_labels.flatten()
 
-  W, bias = train_multilayer_ce(images,labels, test_images, test_labels, 100)
-  g_S, output = predict_single_layer(test_images, test_labels, W, bias)
+  W1, W2, W3, bias1, bias2, bias3 = train_multilayer_ce(images,labels, test_images, test_labels, 100)
+  #g_S, output = predict_single_layer(test_images, test_labels, W, bias)
 
   code.interact(local = locals())
 
