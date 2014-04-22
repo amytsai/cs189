@@ -48,12 +48,14 @@ t_k - \sfn
 & \qquad \left.2\sfn \cdot \sfn \left( 1 - \sfn \right)
 \right]
 \end{split} \\
- \label{eq:partialJ}
 \begin{split}
 \frac{\partial J}{\partial W_{jk}} &= 
 -t_k \sfn \left( 1 - \sfn \right) x_j + \\
 & \qquad \sfn \cdot \sfn \left( 1 - \sfn \right)
-\end{split}
+\end{split} \\
+ \label{eq:partialJ}
+\frac{\partial J}{\partial W_{jk}} &= 
+-t_k y_k \left( 1 - y_k \right) x_j + y_k \cdot y_k \left( 1 - y_k \right)
 \end{align}
 
 Using the result found in equation  \eqref{eq:partialJ} we can construct $\nabla J$. The update equation simply changes the weights by some learning alpha $\alpha$:
