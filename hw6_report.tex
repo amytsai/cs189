@@ -2,7 +2,7 @@
 \usepackage{amsmath,textcomp,amssymb,geometry,graphicx}
 
 \def\Name{Amy Tsai, Allen Li}  % Your name
-\def\Homework{5}%Number of Homework, PUT SOMETHING HERE
+\def\Homework{6}%Number of Homework, PUT SOMETHING HERE
 \def\Session{Spring 2014}
 
 
@@ -18,16 +18,60 @@
 
 In this project, we implemented Decision Trees, Random Forests, and Adaboosted Decision Trees. We didn't use any external sources other than the papers provided with the homework instructions. 
 
-\section{What we implemented}
+\section{Derivations}
 
-In addition to the items we were required to implement, we also implemented \textbf{cross-validation}, as well as \textbf{multiprocessing generation of Random Forests}. 
+\subsection{Stochastic Gradient Update for Single Layer Neural Networks}
 
-\subsection{Cross-Validation}
-We implemented generic functions to perform cross-validation on any learning algorithm, and several of the algorithms that we implemented here can be passed in, enabling us to cross-validate all of our algorithms with ease. 
+\paragraph{Mean Squared Error} We want to derive the stochastic gradient update for mean squared error:
 
-\subsection{Multiprocessing}
-Multiprocessing the generation of forests helped increase our speed approximately linearly with the number of physical cores in the computer. Multiprocessing was performed using the Python 2.7 \texttt{multiprocessing} module. 
+\[
+	J = \frac{1}{2}\sum_{k=1}^{n_{out}}\left( t_k - y_k \right) ^2
+\]
 
+Which expanded out is equivalent to:
+\[
+	J = \frac{1}{2}\sum_{k=1}^{n_{out}}\left( t_k - \sigma \left( \sum_j W_{jk} x_j + b_k \right) \right) ^2
+\]
+
+To find the gradient, we'll find the partial derivative with respect to a single element of the weight matrix, $W_{jk}$. We can think of the biases as weights too, with a constant input of $1$. To find the gradient:
+
+\newcommand{\sfn}{\sigma \left( \sum_j W_{jk} x_j\right)}
+\begin{align}
+\frac{\partial J}{\partial W_{jk}} &= \frac{1}{2}\frac{\partial}{\partial W_{jk}}\left(
+t_k - \sfn
+\right) ^2 \\
+&= \frac{1}{2} \frac{\partial}{\partial W_{jk}} \left[ t_k^2 - 2t_k\sfn + \sfn^2 \right] \\
+&= \frac{1}{2} \frac{\partial}{\partial W_{jk}} \left[- 2t_k\sfn + \sfn^2 \right] \\
+\begin{split}
+&= \frac{1}{2} \left[
+-2t_k \sfn \left( 1 - \sfn \right) x_j \right.+ \\
+& \qquad \left.2\sfn \cdot \sfn \left( 1 - \sfn \right)
+\right]
+\end{split} \\
+ \label{eq:partialJ}
+\begin{split}
+\frac{\partial J}{\partial W_{jk}} &= 
+-t_k \sfn \left( 1 - \sfn \right) x_j + \\
+& \qquad \sfn \cdot \sfn \left( 1 - \sfn \right)
+\end{split}
+\end{align}
+
+Using the result found in equation  \eqref{eq:partialJ} we can construct $\nabla J$. The update equation simply changes the weights by some learning alpha $\alpha$:
+\[
+	W_{new} = W_{old} - \alpha \nabla J \circ W_{old}
+\]  
+
+(Where $\circ$ is the pointwise product of matrices. )
+
+\paragraph{Cross-entropy error} We want to derive the update equation for cross-entropy error:
+\[
+	J = - \sum_{k=1}^{n_{out}}\left[t_k \ln y_k + \left(1- t_k \right)\ln \left( 1- y_k \right) \right]
+\]
+
+The update equation is similar to that of mean squared error:
+\[
+	W_{new} = W_{old} - \alpha \nabla J \circ W_{old}
+\]  
 \section{Results}
 
 We tested our results by performing cross-validation. \\
