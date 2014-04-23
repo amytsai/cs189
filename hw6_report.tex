@@ -135,7 +135,11 @@ For subsequent layers, we simply note that (from class):
 And so we have computed the gradient, and thus the update equation (again, in the same manner as previously). 
 
 \section{Results}
-We managed to achieve a 7.9\% error rate using a single layer neural network with cross-entropy error, and a 5.0\% error rate with a multilayer neural network, also with cross-entropy error. 
+We managed to achieve a 7.9\% error rate using a single layer neural network with cross-entropy error, and a 22\% error rate with a multilayer neural network with mean squared error.
+
+For the single layer network, we used $\alpha = 0.015$. For the multilayer network, we used $\alpha = 0.010$. We decayed alpha by multiplying it by $\frac{1}{t^{.38}}$, where $t$ is the number of the epoch. 
+
+The single layer network took about an hour to train, and the multilayer network took about two. 
 
 We found that in general, cross-entropy error was more effective than mean squared error, training networks much more reliably. 
 
