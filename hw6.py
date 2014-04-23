@@ -115,6 +115,7 @@ def train_single_layer_ce(images, labels, t_images, t_labels, epochs):
 
 
   means = np.average(t_images, 0).reshape(1, 10000)
+  t_images.subrtact(t_images.means)
   stds = np.std(t_images,0)
   for col in range(0, t_images.shape[1]):
     column = t_images[:, col]
@@ -230,7 +231,7 @@ def train_multilayer_ms(images, labels, t_images, t_labels, epochs):
   test_errors = []
   eps = []
 
-  alpha = .05
+  alpha = .05 
   images_t = images.transpose()
 
   #convert labels to 10 dimensional vector
@@ -339,7 +340,7 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
   test_errors = []
   eps = []
 
-  alpha = .008
+  alpha = .05
   images_t = images.transpose()
 
   #convert labels to 10 dimensional vector

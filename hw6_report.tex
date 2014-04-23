@@ -131,12 +131,21 @@ For subsequent layers, we simply note that (from class):
 \end{align*}
 And so we have computed the gradient, and thus the update equation (again, in the same manner as previously). 
 
-\section{Results}
+\section{Implementation and Results}
+\subsection{Preprocessing}
+Before training we preprocessed the data by normalizing each feature to have a mean of 0 \and variance of 1
+
+\subsection{Vectorization}
+To improve the performance of our code, we vectorized each minibatch such that it was possible to calculate the delta's and weight updates for all 200 images at once.
+
+\subsection{Results}
+
 We managed to achieve a 7.9\% error rate using a single layer neural network with cross-entropy error, and a 5.0\% error rate with a multilayer neural network, also with cross-entropy error. 
 
 We found that in general, cross-entropy error was more effective than mean squared error, training networks much more reliably. 
 
 You can see various graphical results included as png files in this submission. They show the progression of our neural networks over time. 
+
 
 
 \end{document}
