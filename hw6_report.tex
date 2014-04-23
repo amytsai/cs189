@@ -16,7 +16,11 @@
 
 \section{Introduction}
 
-In this project, we implemented Decision Trees, Random Forests, and Adaboosted Decision Trees. We didn't use any external sources other than the papers provided with the homework instructions. 
+In this project, we implemented single and multiple layer Neural Networks. We used some papers as reference:
+\begin{enumerate}
+\item http://www.cs.vassar.edu/~cs365/handouts/backprop.pdf
+\item http://www.aaai.org/Papers/FLAIRS/2002/FLAIRS02-075.pdf
+\end{enumerate}
 
 \section{Derivations}
 
@@ -91,33 +95,48 @@ We then find the update equation in a similar fashion as we found the one for me
 \[
 	W_{new} = W_{old} - \alpha \nabla J \circ W_{old}
 \]  
+
+\subsection{Update Equation for Multilayer Networks}
+\newcommand{\skl}{S_k^{(l)}}
+\newcommand{\dkl}{\delta_k^{(l)}}
+In class, we discovered that if we defined:
+\[
+\dkl = \sum_j W_{jk} x_j
+\]
+\[
+\dkl = \frac{\partial J}{\partial \skl}
+\]
+
+Then finding the gradient of the cost function reduced as follows:
+\[
+\frac{\partial J}{\partial W_{jk}} = \frac{\partial J}{\partial \skl} \cdot \frac{\partial \skl }{\partial W_{jk}}
+ = \frac{\partial J}{\partial \skl} \cdot x_{jk} = \dkl x_{jk}
+\]
+
+Since we always know the $x_{jk}$, the problem is reduced to finding the deltas. To find the delta of the last layer (using $\tanh$ as our activation function):
+\begin{align}
+	J &= \frac{1}{2}\sum_{k=1}^{n_{out}}\left( t_k - y_k \right) ^2 \\
+	&= \frac{1}{2}\left[ t_k^2 - 2t_k \tanh \left( \skl \right) + \tanh ^2 \left( \skl \right) \right] \\
+	\dkl &=  - t_k \left[ 1 - \tanh ^2 \left( \skl \right) \right] + \tanh \left( \skl \right) \left[ 1 - \tanh ^2 \left( \skl \right) \right] \\
+	\dkl &= -t_k + \tanh \left( \skl \right) + \tanh ^2 \left( \skl \right) - \tanh ^3 \left( \skl \right) 
+\end{align}
+And for cross-entropy error:
+\begin{align}
+	J &= - \sum_{k=1}^{n_{out}}\left[t_k \ln y_k + \left(1- t_k \right)\ln \left( 1- y_k \right) \right]
+\end{align}
+For subsequent layers, we simply note that (from class):
+\begin{align*}
+\delta_k^{(l-1)} &= g'\left( S_k^{(l-1)} \right) \left( \sum_k \dkl W_{jk}^{(l)} \right) \\
+&= \sigma \left( S_k^{(l-1)} \right) \left( 1 - \sigma \left( S_k^{(l-1)} \right) \right) \left( \sum_k \dkl W_{jk}^{(l)} \right)
+\end{align*}
+And so we have computed the gradient, and thus the update equation (again, in the same manner as previously). 
+
 \section{Results}
+We managed to achieve a 7.9\% error rate using a single layer neural network with cross-entropy error, and a 5.0\% error rate with a multilayer neural network, also with cross-entropy error. 
 
-We tested our results by performing cross-validation. \\
+We found that in general, cross-entropy error was more effective than mean squared error, training networks much more reliably. 
 
-We obtained results of varying degrees. Our best result for a single Decision Tree was about 7.5\% error rate. Our best result for Adaboosted decision trees was about 6.8\%. Since Random Forests were the most promising of the three algorithms, we more extensively tested those. Here are some test results from Random Forests: \\
+You can see various graphical results included as png files in this submission. They show the progression of our neural networks over time. 
 
-\begin{tabular}{|c|c|c||c|}
-\hline
-Number of Trees & Samples Per Tree & Attributes Per Node & Error Rate (\%)\\
-15 & 500 & 25 & 7.2 \\
-15 & 500 & 25 & 6.3 \\
-15 & 600 & 20 & 6.1 \\
-15 & 400 & 20 & 7.5 \\
-21 & 800 & 20 & 6.2 \\
-21 & 400 & 20 & 6.9 \\
-21 & 600 & 20 & 6.5 \\
-21 & 900 & 20 & 6.1 \\
-21 & 1100 & 20 & 5.8 \\
-21 & 1500 & 20 & 5.82 \\
-21 & 1100 & 15 & 5.6 \\
-31 & 1100 & 15 & 5.4 \\
-31 & 1100 & 17 & 5.67 \\
-51 & 1100 & 15 & 5.47 \\
-\hline
-\end{tabular}
-\vspace{11pt}
-\\
-We found that the last configuration was best and therefore used it in our Kaggle submission. It takes about 90 seconds to generate this forest on a 4th generation Intel i5 dual-core 2.4 GHz processor on OS X. 
 
 \end{document}
