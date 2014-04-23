@@ -122,7 +122,10 @@ Since we always know the $x_{jk}$, the problem is reduced to finding the deltas.
 \end{align}
 And for cross-entropy error:
 \begin{align}
-	J &= - \sum_{k=1}^{n_{out}}\left[t_k \ln y_k + \left(1- t_k \right)\ln \left( 1- y_k \right) \right]
+	J &= - \sum_{k=1}^{n_{out}}\left[t_k \ln y_k + \left(1- t_k \right)\ln \left( 1- y_k \right) \right] \\
+	&= - \left[ t_k \ln \left( \tanh \skl \right) + \left( 1 - t_k \right) \ln \left( 1 - \tanh \skl \right) \right] \\
+	\dkl &= - \left[ t_k \frac{1}{\tanh \skl} \left( 1 - \tanh ^2 \skl \right) + \left( 1 - t_k \right) \frac{1}{1 - \tanh \skl} \left( \tanh ^2 \skl - 1 \right) \right]  \\
+	&= t_k \tanh \skl - \frac{t_k}{\tanh \skl} + \frac{1 - t_k}{\tanh \skl - 1} \left( \tanh ^2 S - 1 \right) 
 \end{align}
 For subsequent layers, we simply note that (from class):
 \begin{align*}
@@ -130,6 +133,7 @@ For subsequent layers, we simply note that (from class):
 &= \sigma \left( S_k^{(l-1)} \right) \left( 1 - \sigma \left( S_k^{(l-1)} \right) \right) \left( \sum_k \dkl W_{jk}^{(l)} \right)
 \end{align*}
 And so we have computed the gradient, and thus the update equation (again, in the same manner as previously). 
+
 
 \section{Implementation and Results}
 \subsection{Preprocessing}
@@ -139,8 +143,11 @@ Before training we preprocessed the data by normalizing each feature to have a m
 To improve the performance of our code, we vectorized each minibatch such that it was possible to calculate the delta's and weight updates for all 200 images at once.
 
 \subsection{Results}
+We managed to achieve a 7.9\% error rate using a single layer neural network with cross-entropy error, and a 22\% error rate with a multilayer neural network with mean squared error.
 
-We managed to achieve a 7.9\% error rate using a single layer neural network with cross-entropy error, and a 5.0\% error rate with a multilayer neural network, also with cross-entropy error. 
+For the single layer network, we used $\alpha = 0.015$. For the multilayer network, we used $\alpha = 0.010$. We decayed alpha by multiplying it by $\frac{1}{t^{.38}}$, where $t$ is the number of the epoch. 
+
+The single layer network took about an hour to train, and the multilayer network took about two. 
 
 We found that in general, cross-entropy error was more effective than mean squared error, training networks much more reliably. 
 
