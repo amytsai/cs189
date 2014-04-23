@@ -1,0 +1,142 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,textcomp,amssymb,geometry,graphicx}
+
+\def\Name{Amy Tsai, Allen Li}  % Your name
+\def\Homework{6}%Number of Homework, PUT SOMETHING HERE
+\def\Session{Spring 2014}
+
+
+\title{CS 189 Report for Homework \Homework}
+\author{\Name}
+\markboth{CS189 Homework \Homework\ \Name}{CS 189 \Session\ Homework \Homework\ \Name}
+\pagestyle{myheadings}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+In this project, we implemented single and multiple layer Neural Networks. We used some papers as reference:
+\begin{enumerate}
+\item http://www.cs.vassar.edu/~cs365/handouts/backprop.pdf
+\item http://www.aaai.org/Papers/FLAIRS/2002/FLAIRS02-075.pdf
+\end{enumerate}
+
+\section{Derivations}
+
+\subsection{Stochastic Gradient Update for Single Layer Neural Networks}
+
+\paragraph{Mean Squared Error} We want to derive the stochastic gradient update for mean squared error:
+
+\[
+	J = \frac{1}{2}\sum_{k=1}^{n_{out}}\left( t_k - y_k \right) ^2
+\]
+
+Which expanded out is equivalent to:
+\[
+	J = \frac{1}{2}\sum_{k=1}^{n_{out}}\left( t_k - \sigma \left( \sum_j W_{jk} x_j + b_k \right) \right) ^2
+\]
+
+To find the gradient, we'll find the partial derivative with respect to a single element of the weight matrix, $W_{jk}$. We can think of the biases as weights too, with a constant input of $1$. To find the gradient:
+
+\newcommand{\sfn}{\sigma \left( \sum_j W_{jk} x_j\right)}
+\begin{align}
+\frac{\partial J}{\partial W_{jk}} &= \frac{1}{2}\frac{\partial}{\partial W_{jk}}\left(
+t_k - \sfn
+\right) ^2 \\
+&= \frac{1}{2} \frac{\partial}{\partial W_{jk}} \left[ t_k^2 - 2t_k\sfn + \sfn^2 \right] \\
+&= \frac{1}{2} \frac{\partial}{\partial W_{jk}} \left[- 2t_k\sfn + \sfn^2 \right] \\
+\begin{split}
+&= \frac{1}{2} \left[
+-2t_k \sfn \left( 1 - \sfn \right) x_j \right.+ \\
+& \qquad \left.2\sfn \cdot \sfn \left( 1 - \sfn \right)
+\right]
+\end{split} \\
+\begin{split}
+\frac{\partial J}{\partial W_{jk}} &= 
+-t_k \sfn \left( 1 - \sfn \right) x_j + \\
+& \qquad \sfn \cdot \sfn \left( 1 - \sfn \right)
+\end{split} \\
+ \label{eq:partialJ}
+\frac{\partial J}{\partial W_{jk}} &= 
+-t_k y_k \left( 1 - y_k \right) x_j + y_k \cdot y_k \left( 1 - y_k \right)
+\end{align}
+
+Using the result found in equation  \eqref{eq:partialJ} we can construct $\nabla J$. The update equation simply changes the weights by some learning alpha $\alpha$:
+\[
+	W_{new} = W_{old} - \alpha \nabla J \circ W_{old}
+\]  
+
+(Where $\circ$ is the pointwise product of matrices. )
+
+\paragraph{Cross-entropy error} We want to derive the update equation for cross-entropy error:
+\[
+	J = - \sum_{k=1}^{n_{out}}\left[t_k \ln y_k + \left(1- t_k \right)\ln \left( 1- y_k \right) \right]
+\]
+
+As an aside, we note the partial derivative of $y_k$:
+\begin{align}
+\frac{\partial}{\partial W_{jk}} y_k &= \frac{\partial}{\partial W_{jk}} \left[ \sfn \right] \\ 
+&= \sfn \left( 1 - \sfn \right) x_j \\
+&= y_k \left( 1 - y_k \right) x_j
+\end{align}
+
+That stated, we proceed to determine the partial derivative of the cross-entropy error:
+\begin{align}
+J &= - \sum_{k=1}^{n_{out}}\left[t_k \ln y_k + \left(1- t_k \right)\ln \left( 1- y_k \right) \right] \\
+\frac{\partial J}{\partial W_{jk}} &= 
+- \left[ t_k \frac{1}{y_k} y_k \left( 1 - y_k \right) x_j + \left( 1 - t_k \right) \frac{1}{1 - y_k} \left( - y_k \left( 1 - y_k \right) x_j \right) \right] \\
+&= - \left[ t_k \left( 1 - y_k \right) x_j + \left( 1 - t_k \right) \left( -y_k x_j \right) \right] \\
+&= - \left[ t_k x_j - t_k y_k x_j - y_k x _j + t_k y_k x_j \right] \\
+\frac{\partial J}{\partial W_{jk}} &= y_k x_j - t_k x_j
+\end{align}
+
+We then find the update equation in a similar fashion as we found the one for mean squared error:
+\[
+	W_{new} = W_{old} - \alpha \nabla J \circ W_{old}
+\]  
+
+\subsection{Update Equation for Multilayer Networks}
+\newcommand{\skl}{S_k^{(l)}}
+\newcommand{\dkl}{\delta_k^{(l)}}
+In class, we discovered that if we defined:
+\[
+\dkl = \sum_j W_{jk} x_j
+\]
+\[
+\dkl = \frac{\partial J}{\partial \skl}
+\]
+
+Then finding the gradient of the cost function reduced as follows:
+\[
+\frac{\partial J}{\partial W_{jk}} = \frac{\partial J}{\partial \skl} \cdot \frac{\partial \skl }{\partial W_{jk}}
+ = \frac{\partial J}{\partial \skl} \cdot x_{jk} = \dkl x_{jk}
+\]
+
+Since we always know the $x_{jk}$, the problem is reduced to finding the deltas. To find the delta of the last layer (using $\tanh$ as our activation function):
+\begin{align}
+	J &= \frac{1}{2}\sum_{k=1}^{n_{out}}\left( t_k - y_k \right) ^2 \\
+	&= \frac{1}{2}\left[ t_k^2 - 2t_k \tanh \left( \skl \right) + \tanh ^2 \left( \skl \right) \right] \\
+	\dkl &=  - t_k \left[ 1 - \tanh ^2 \left( \skl \right) \right] + \tanh \left( \skl \right) \left[ 1 - \tanh ^2 \left( \skl \right) \right] \\
+	\dkl &= -t_k + \tanh \left( \skl \right) + \tanh ^2 \left( \skl \right) - \tanh ^3 \left( \skl \right) 
+\end{align}
+And for cross-entropy error:
+\begin{align}
+	J &= - \sum_{k=1}^{n_{out}}\left[t_k \ln y_k + \left(1- t_k \right)\ln \left( 1- y_k \right) \right]
+\end{align}
+For subsequent layers, we simply note that (from class):
+\begin{align*}
+\delta_k^{(l-1)} &= g'\left( S_k^{(l-1)} \right) \left( \sum_k \dkl W_{jk}^{(l)} \right) \\
+&= \sigma \left( S_k^{(l-1)} \right) \left( 1 - \sigma \left( S_k^{(l-1)} \right) \right) \left( \sum_k \dkl W_{jk}^{(l)} \right)
+\end{align*}
+And so we have computed the gradient, and thus the update equation (again, in the same manner as previously). 
+
+\section{Results}
+We managed to achieve a 7.9\% error rate using a single layer neural network with cross-entropy error, and a 5.0\% error rate with a multilayer neural network, also with cross-entropy error. 
+
+We found that in general, cross-entropy error was more effective than mean squared error, training networks much more reliably. 
+
+You can see various graphical results included as png files in this submission. They show the progression of our neural networks over time. 
+
+
+\end{document}
