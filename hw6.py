@@ -181,7 +181,7 @@ def train_single_layer_ce(images, labels, t_images, t_labels, epochs):
       print 'error at epoch ', e, 'is: ', error
 
     #backwards pass
-    delta = (g_S - t_batch) 
+    delta = g_S - t_batch 
     a = alpha / pow(e + 1, .38)
     #update
     W = W - a * np.dot(images_batch, delta.transpose())
@@ -230,7 +230,7 @@ def train_multilayer_ms(images, labels, t_images, t_labels, epochs):
   test_errors = []
   eps = []
 
-  alpha = .007
+  alpha = .05
   images_t = images.transpose()
 
   #convert labels to 10 dimensional vector
@@ -292,7 +292,7 @@ def train_multilayer_ms(images, labels, t_images, t_labels, epochs):
       error = error.sum() / 60000.0
       loss = np.power(t - output, 2)
       loss = .1 * error.sum()
-      loss = loss/ 60000.0
+      loss = -loss/ 60000.0
       train_errors.append(error)
       train_loss.append(loss)
       
@@ -325,6 +325,7 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
 
   #t_images = t_images/ 255.0
   means = np.average(t_images, 1).reshape(784, 1)
+  t_images = np.subtract(t_images, means)
   stds = np.std(t_images, 1)
   for col in range(0, t_images.shape[0]):
     column = t_images[col, :]
@@ -338,7 +339,7 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
   test_errors = []
   eps = []
 
-  alpha = .015
+  alpha = .008
   images_t = images.transpose()
 
   #convert labels to 10 dimensional vector
@@ -350,9 +351,9 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
   t = t.transpose()
 
   #initialize weights and biases
-  W1 = np.random.rand(784, 300) * 2 - 1
-  W2 = np.random.rand(300, 100) * 2 - 1
-  W3 = np.random.rand(100, 10) * 2 - 1
+  W1 = np.random.rand(784, 300) * 20 -10
+  W2 = np.random.rand(300, 100) * 20 -10
+  W3 = np.random.rand(100, 10) * 20 -10
   bias1 = np.random.rand(1,300)  
   bias2 = np.random.rand(1, 100) 
   bias3 = np.random.rand(1, 10)  
@@ -399,8 +400,8 @@ def train_multilayer_ce(images, labels, t_images, t_labels, epochs):
       error = np.not_equal(y, labels)
       error = error.sum() / 60000.0
       loss = t * np.log(output + .00000000000001) + (1.0-t) * np.log(1.0 - output + .00000000000001) # log + small value
-      loss = .1 * loss.sum()
-      loss = loss/ 60000.0
+      loss = .01 * loss.sum()
+      loss = -loss / 60000.0
       train_errors.append(error)
       train_loss.append(loss)
       
