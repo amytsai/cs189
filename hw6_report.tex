@@ -122,7 +122,10 @@ Since we always know the $x_{jk}$, the problem is reduced to finding the deltas.
 \end{align}
 And for cross-entropy error:
 \begin{align}
-	J &= - \sum_{k=1}^{n_{out}}\left[t_k \ln y_k + \left(1- t_k \right)\ln \left( 1- y_k \right) \right]
+	J &= - \sum_{k=1}^{n_{out}}\left[t_k \ln y_k + \left(1- t_k \right)\ln \left( 1- y_k \right) \right] \\
+	&= - \left[ t_k \ln \left( \tanh \skl \right) + \left( 1 - t_k \right) \ln \left( 1 - \tanh \skl \right) \right] \\
+	\dkl &= - \left[ t_k \frac{1}{\tanh \skl} \left( 1 - \tanh ^2 \skl \right) + \left( 1 - t_k \right) \frac{1}{1 - \tanh \skl} \left( \tanh ^2 \skl - 1 \right) \right]  \\
+	&= t_k \tanh \skl - \frac{t_k}{\tanh \skl} + \frac{1 - t_k}{\tanh \skl - 1} \left( \tanh ^2 S - 1 \right) 
 \end{align}
 For subsequent layers, we simply note that (from class):
 \begin{align*}
